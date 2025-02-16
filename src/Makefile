@@ -15,7 +15,8 @@ CC += -DSQLITE_NO_SYNC=1
 
 #### Extra arguments for linking the finished binary. 
 #
-LIB = $(LDFLAGS)
+# LIB = $(LDFLAGS)
+LDFLAGS = -L/usr/lib/x86_64-linux-gnu -lodbc
 
 # You should not need to change anything below this line
 ###############################################################################
@@ -36,7 +37,7 @@ OPTS += -DSQLITE_THREADSAFE=0
 OPTS += -DSQLITE_OMIT_LOAD_EXTENSION
 
 sqllogictest$(E):	sqllogictest.c sqllogictest.h $(OBJ) $(INC)
-	$(CC) -o sqllogictest$(E) sqllogictest.c $(OBJ)
+	$(CC) -o sqllogictest$(E) sqllogictest.c $(OBJ) $(LDFLAGS)
 
 md5.o:	md5.c
 	$(CC) -c md5.c
