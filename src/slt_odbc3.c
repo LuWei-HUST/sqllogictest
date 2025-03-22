@@ -418,9 +418,9 @@ static int ODBC3Connect(
     if( !zConnectStr || !strstr(zConnectStr, "DSN=") ){
       strcat(szConnStrIn, "DSN=" SLT_DSN ";");
     }
-    if( !zConnectStr || !strstr(zConnectStr, "DATABASE=") ){
-      strcat(szConnStrIn, "DATABASE=" SLT_DB ";");
-    }
+    // if( !zConnectStr || !strstr(zConnectStr, "DATABASE=") ){
+    //   strcat(szConnStrIn, "DATABASE=" SLT_DB ";");
+    // }
     if( zConnectStr ){
       strcat(szConnStrIn, zConnectStr);
     }
@@ -450,9 +450,9 @@ static int ODBC3Connect(
 
   /* Loop over all tables, etc. available in the database and drop them,
   ** thus resetting it to an empty database.  */
-  if( !rc ){
-    rc = ODBC3_dropAllTables(pODBC3conn);
-  }
+  // if( !rc ){
+  //   rc = ODBC3_dropAllTables(pODBC3conn);
+  // }
   
   /* TBD: is there a way to specify synchronous=OFF or equivalent */
 
