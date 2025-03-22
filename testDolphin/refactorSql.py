@@ -1,9 +1,10 @@
 import os
+import re
 
-basepath = "/home/luwei/code/sqllogictest/test"
-outbasepath = "/home/luwei/code/sqllogictest/testDolphin"
+basepath = "/home/luwei/code/sqllogictest/test/random/aggregates"
+outbasepath = "/home/luwei/code/sqllogictest/testDolphin/random/aggregates"
 sourceFiles = [
-    "select3.test",
+    "slt_good_1.test",
 ]
 
 def getNextRecord(i, lines, length):
@@ -47,6 +48,8 @@ for sfile in sourceFiles:
 
     newText = "".join(newLines)
     newText = newText.replace("INTEGER", "INT")
+
+    newText = re.sub(r'VARCHAR\(\d+\)', r'STRING', newText)
 
     outfilepath = os.path.join(outbasepath, sfile)
     with open(outfilepath, "w") as fout:
