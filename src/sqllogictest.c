@@ -489,6 +489,7 @@ int main(int argc, char **argv){
       nextLine(&sScript);
       tokenizeLine(&sScript);
     }
+    // printf("bSkip: %d\n", bSkip);
     if( bSkip ) {
       int n;
       nSkipped++;
@@ -612,6 +613,8 @@ int main(int argc, char **argv){
       if( enableTrace ) printf("%s;\n", zScript);
       rc = pEngine->xQuery(pConn, zScript, sScript.azToken[1],
                            &azResult, &nResult);
+      // printf("zScript: %s\n", zScript);
+      // printf("rc: %d\n", rc);
       nCmd++;
       if( rc ){
         fprintf(stderr, "%s:%d: query failed\n",

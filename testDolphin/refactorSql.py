@@ -31,9 +31,13 @@ for sfile in sourceFiles:
             nextInd = getNextRecord(ind, lines, length)
             while ind < length and ind < nextInd and lines[ind].strip() != "----":
                 print(lines[ind])
-                newLine = lines[ind].replace("e", "eCol")
-                newLines.append(newLine[:])
-                ind += 1
+                if lines[ind].startswith("query"):
+                    newLines.append(lines[ind][:])
+                    ind += 1
+                else:
+                    newLine = lines[ind].replace("e", "eCol")
+                    newLines.append(newLine[:])
+                    ind += 1
             
             # newLines.append("\n")
             if ind < length and lines[ind].strip() == "----":
@@ -48,6 +52,11 @@ for sfile in sourceFiles:
 
     newText = "".join(newLines)
     newText = newText.replace("INTEGER", "INT")
+    newText = newText.replace("COUNT", "count")
+    newText = newText.replace("MIN", "min")
+    newText = newText.replace("MAX", "max")
+    newText = newText.replace("AVG", "avg")
+    newText = newText.replace("DISTINCT", "distinct")
 
     newText = re.sub(r'VARCHAR\(\d+\)', r'STRING', newText)
 
