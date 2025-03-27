@@ -527,7 +527,7 @@ static int ODBC3Query(
   ODBC3_Handles *pODBC3conn = pConn;
   ODBC3_resAccum res;         /* query result accumulator */
   char zBuffer[512];          /* Buffer to render numbers */
-  SQLSMALLINT columns;        /* number of columns in result-set */
+  SQLSMALLINT columns = 1;        /* number of columns in result-set */
   SQLHSTMT stmt = SQL_NULL_HSTMT;
   SQLUSMALLINT i;
 
@@ -561,16 +561,40 @@ static int ODBC3Query(
     }
   }
 
-  if( !rc ){
+  // 获取每个列的数据类型
+  char ColumnName[100];
+  int nameLength = 0;
+  SQLSMALLINT dataType;
+  SQLULEN colSize;
+  SQLSMALLINT DecimalDigits;
+  SQLSMALLINT Nullable;
+  SQLSMALLINT *dataTypes = malloc(sizeof(SQLSMALLINT)*columns);
+  if ( !rc ) {
+    for (int i=0;i<columns;i++) {
+      ret = SQLDescribeCol(stmt, i, &ColumnName, 100, &nameLength, &dataType, &colSize, &DecimalDigits, &Nullable);
+      if( !SQL_SUCCEEDED(ret) && (ret != SQL_SUCCESS_WITH_INFO) ){
+        ODBC3_perror("SQLDescribeCol", stmt, SQL_HANDLE_STMT);
+        rc = 1;
+        break;
+      } else {
+        dataTypes[i] = dataType;
+      }
+
+    }
+  }
+
+  if ( !rc ) {
     /* Loop through the rows in the result-set */
     do {
       ret = SQLFetch(stmt);
+
       if( SQL_SUCCEEDED(ret) ){
         /* Loop through the columns */
         for(i = 1; !rc && (i <= columns); i++){
           SQLINTEGER indicator = 0;
-          switch( zType[i-1] ){
-            case 'T': {
+
+          switch( dataTypes[i-1] ){
+            case SQL_CHAR: {
               /* retrieve column data as a string */
               ret = SQLGetData(stmt, 
                                i, 
@@ -592,7 +616,7 @@ static int ODBC3Query(
               }
               break;
             }
-            case 'I': {
+            case SQL_INTEGER: {
               long int li = 0L;
               SQLGetData(stmt, 
                          i, 
@@ -608,7 +632,7 @@ static int ODBC3Query(
               ODBC3_appendValue(&res, zBuffer);
               break;
             }
-            case 'R': {
+            case SQL_DOUBLE: {
               double r = 0.0f;
               SQLGetData(stmt, 
                          i, 
@@ -633,6 +657,79 @@ static int ODBC3Query(
       }
     } while( !rc && SQL_SUCCEEDED(ret) );
   }
+
+  // if( !rc ){
+  //   /* Loop through the rows in the result-set */
+  //   do {
+  //     ret = SQLFetch(stmt);
+  //     if( SQL_SUCCEEDED(ret) ){
+  //       /* Loop through the columns */
+  //       for(i = 1; !rc && (i <= columns); i++){
+  //         SQLINTEGER indicator = 0;
+  //         switch( zType[i-1] ){
+  //           case 'T': {
+  //             /* retrieve column data as a string */
+  //             ret = SQLGetData(stmt, 
+  //                              i, 
+  //                              SQL_C_CHAR,
+  //                              zBuffer, 
+  //                              sizeof(zBuffer), 
+  //                              &indicator);
+  //             if( SQL_SUCCEEDED(ret) ){
+  //               char *z;
+  //               if( indicator == SQL_NULL_DATA ) strcpy(zBuffer, "NULL");
+  //               if( zBuffer[0]==0 ) strcpy(zBuffer, "(empty)");
+  //               ODBC3_appendValue(&res, zBuffer);
+  //               /* Convert non-printing and control characters to '@' */
+  //               z = res.azValue[res.nUsed-1];
+  //               while( *z ){
+  //                 if( *z<' ' || *z>'~' ){ *z = '@'; }
+  //                 z++;
+  //               }
+  //             }
+  //             break;
+  //           }
+  //           case 'I': {
+  //             long int li = 0L;
+  //             SQLGetData(stmt, 
+  //                        i, 
+  //                        SQL_C_SLONG,
+  //                        &li, 
+  //                        sizeof(li), 
+  //                        &indicator);
+  //             if( indicator == SQL_NULL_DATA ){
+  //               strcpy(zBuffer, "NULL");
+  //             }else{
+  //               sprintf(zBuffer, "%ld", li);
+  //             }
+  //             ODBC3_appendValue(&res, zBuffer);
+  //             break;
+  //           }
+  //           case 'R': {
+  //             double r = 0.0f;
+  //             SQLGetData(stmt, 
+  //                        i, 
+  //                        SQL_C_DOUBLE,
+  //                        &r, 
+  //                        sizeof(r), 
+  //                        &indicator);
+  //             if( indicator == SQL_NULL_DATA ){
+  //               strcpy(zBuffer, "NULL");
+  //             }else{
+  //               sprintf(zBuffer, "%.3f", r);
+  //             }
+  //             ODBC3_appendValue(&res, zBuffer);
+  //             break;
+  //           }
+  //           default: {
+  //             fprintf(stderr, "unknown character in type-string: %c\n", zType[i-1]);
+  //             rc = 1;
+  //           }
+  //         } /* end switch */
+  //       } /* end for i */
+  //     }
+  //   } while( !rc && SQL_SUCCEEDED(ret) );
+  // }
   
   if( stmt != SQL_NULL_HSTMT ){
     SQLFreeHandle(SQL_HANDLE_STMT, stmt);
