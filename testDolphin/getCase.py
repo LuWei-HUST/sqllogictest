@@ -1,4 +1,5 @@
 import os
+import dolphindb as ddb
 
 scriptPath = "/home/luwei/code/sqllogictest/testDolphin/random/aggregates/slt_good_0.test"
 
@@ -23,6 +24,8 @@ def getCase(lines, length, startIndex):
             i += 1
             while i < nextInd:
                 newLines.append(lines[i][:])
+                if lines[i].find("CREATE") != -1:
+                    newLines.append("go\n")
                 i += 1
 
         i = nextInd
@@ -46,11 +49,22 @@ def getCase(lines, length, startIndex):
 
 if __name__ == "__main__":
 
+    s = ddb.session()
+    s.connect("127.0.0.1", 8848, "admin", "123456")
+
+    # r = s.run("1+1")
+    # print(r)
+
     with open(scriptPath, "r") as fin:
         lines = fin.readlines()
         length = len(lines)
 
-        text = getCase(lines, length, 5786)
+        text = getCase(lines, length, 5675)
+
+        try:
+            r = s.run(text)
+        except Exception as e:
+            print(e)
 
         with open("/home/luwei/code/sqllogictest/testDolphin/case.dos", "w") as fout:
             fout.write(text)

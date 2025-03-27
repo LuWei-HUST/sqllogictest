@@ -1,11 +1,19 @@
 import os
 import re
 
-basepath = "/home/luwei/code/sqllogictest/test/random/aggregates"
-outbasepath = "/home/luwei/code/sqllogictest/testDolphin/random/aggregates"
-sourceFiles = [
-    "slt_good_1.test",
-]
+basepath = "/home/luwei/code/sqllogictest/test/random/expr"
+outbasepath = "/home/luwei/code/sqllogictest/testDolphin/random/expr"
+resbasepath = "/home/luwei/code/sqllogictest/testDolphin/res/random/expr"
+sourceFiles = os.listdir(basepath)
+
+if not os.path.exists(outbasepath):
+    os.mkdir(outbasepath)
+
+if not os.path.exists(resbasepath):
+    os.mkdir(resbasepath)
+
+# print(sourceFiles)
+# exit(0)
 
 def getNextRecord(i, lines, length):
     if i == 0:
@@ -64,4 +72,7 @@ for sfile in sourceFiles:
     with open(outfilepath, "w") as fout:
         fout.write(newText)
 
+    resfilepath = os.path.join(resbasepath, sfile)
+    cmdstr = "~/code/sqllogictest/src/sqllogictest --engine ODBC3 --connection 'DSN=dolphindb;DRIVER={{DolphinDB}};SERVER=127.0.0.1;PORT=8848;UID=admin;PWD=123456;' {} > {}".format(outfilepath, resfilepath)
 
+    os.system(cmdstr)
