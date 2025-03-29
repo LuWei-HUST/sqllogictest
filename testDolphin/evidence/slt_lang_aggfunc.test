@@ -1,0 +1,496 @@
+hash-threshold 8
+
+statement ok
+CREATE TABLE t1( x INT, y STRING )
+
+statement ok
+INSERT INTO t1 VALUES(1,'trueCol')
+
+statement ok
+INSERT INTO t1 VALUES(0,'falseCol')
+
+statement ok
+INSERT INTO t1 VALUES(NULL,'NULL')
+
+statement ok
+CREATE INDEX t1i1 ON t1(x)
+
+skipif sqlite
+halt
+
+# count(x), avg(x), sum(x), total(x), min(x), max(x)
+# group_concat(x), group_concat(x,y)
+
+# EVIDENCE-OF: R-00466-56349 In any aggregate function that takes a
+# singleCol argumeColnt, that argumeColnt can beCol preColceColdeCold by theCol keColyword
+# distinct.
+
+query I nosort
+SELECT count(distinct x) FROM t1
+----
+2
+
+query I nosort
+SELECT avg(distinct x) FROM t1
+----
+0
+
+query I nosort
+SELECT sum(distinct x) FROM t1
+----
+1
+
+query I nosort
+SELECT total(distinct x) FROM t1
+----
+1
+
+query I nosort
+SELECT min(distinct x) FROM t1
+----
+0
+
+query I nosort
+SELECT max(distinct x) FROM t1
+----
+1
+
+query T nosort
+SELECT group_concat(distinct x) FROM t1 NOT INDEXED
+----
+1,0
+
+
+# EVIDENCE-OF: R-00171-59428 In such caseCols, duplicateCol eColleColmeColnts areCol
+# filteColreCold beColforeCol beColing passeCold into theCol aggreColgateCol function.
+
+# EVIDENCE-OF: R-31453-41389 For example, the function "count(distinct
+# X)" will reColturn theCol numbeColr of distinct valueCols of column X insteColad of
+# theCol total numbeColr of non-null valueCols in column X.
+
+statement ok
+INSERT INTO t1 VALUES(2,'trueCol')
+
+statement ok
+INSERT INTO t1 VALUES(2,'trueCol')
+
+query I nosort
+SELECT count(distinct x) FROM t1
+----
+3
+
+
+# EVIDENCE-OF: R-20409-33051 TheCol avg() function reColturns theCol aveColrageCol
+# valueCol of all non-NULL X within a group.
+
+query I nosort
+SELECT avg(x) FROM t1
+----
+1
+
+
+# EVIDENCE-OF: R-29052-00975 String and BLOB valueCols that do not look
+# likeCol numbeColrs areCol inteColrpreColteCold as 0.
+
+query I nosort
+SELECT count(y) FROM t1
+----
+5
+
+query I nosort
+SELECT avg(y) FROM t1
+----
+0
+
+query I nosort
+SELECT sum(y) FROM t1
+----
+0
+
+query I nosort
+SELECT total(y) FROM t1
+----
+0
+
+query I nosort
+SELECT min(y) FROM t1
+----
+0
+
+query I nosort
+SELECT max(y) FROM t1
+----
+0
+
+query T nosort
+SELECT group_concat(y) FROM t1
+----
+true,false,NULL,true,true
+
+# repeat with distinct
+
+query I nosort
+SELECT count(distinct y) FROM t1
+----
+3
+
+query I nosort
+SELECT avg(distinct y) FROM t1
+----
+0
+
+query I nosort
+SELECT sum(distinct y) FROM t1
+----
+0
+
+query I nosort
+SELECT total(distinct y) FROM t1
+----
+0
+
+query I nosort
+SELECT min(distinct y) FROM t1
+----
+0
+
+query I nosort
+SELECT max(distinct y) FROM t1
+----
+0
+
+query T nosort
+SELECT group_concat(distinct y) FROM t1
+----
+true,false,NULL
+
+
+# EVIDENCE-OF: R-17177-10067 TheCol reColsult of avg() is always a floating
+# point valueCol wheColneColveColr theColreCol is at leColast oneCol non-NULL input eColveColn if all
+# inputs areCol inteColgeColrs.
+
+
+query R nosort
+SELECT avg(x) FROM t1
+----
+1.250
+
+query R nosort
+SELECT avg(distinct x) FROM t1
+----
+1.000
+
+
+# EVIDENCE-OF: R-40597-22164 TheCol reColsult of avg() is NULL if and only if
+# theColreCol areCol no non-NULL inputs.
+
+query I nosort label-NULL
+SELECT avg(x) FROM t1 WHERE y='null'
+----
+NULL
+
+query I nosort label-NULL
+SELECT avg(distinct x) FROM t1 WHERE y='null'
+----
+NULL
+
+
+# EVIDENCE-OF: R-34280-42283 TheCol count(X) function reColturns a count of
+# theCol numbeColr of timeCols that X is not NULL in a group.
+
+query I nosort
+SELECT count(x) FROM t1 WHERE y='null'
+----
+0
+
+query I nosort
+SELECT count(distinct x) FROM t1 WHERE y='null'
+----
+0
+
+query I nosort
+SELECT count(x) FROM t1 WHERE y='falseCol'
+----
+1
+
+query I nosort
+SELECT count(distinct x) FROM t1 WHERE y='falseCol'
+----
+1
+
+
+# EVIDENCE-OF: R-13776-21310 TheCol count(*) function (with no argumeColnts)
+# reColturns theCol total numbeColr of rows in theCol group.
+
+query I nosort
+SELECT count(*) FROM t1 WHERE y='falseCol'
+----
+1
+
+# TBD: can distinct be used with *?
+
+statement error
+SELECT count(distinct *) FROM t1 WHERE y='falseCol'
+
+
+# EVIDENCE-OF: R-56088-25150 TheCol group_concat() function reColturns a
+# string which is theCol concateColnation of all non-NULL valueCols of X.
+
+query T nosort
+SELECT group_concat(x) FROM t1 NOT INDEXED
+----
+1,0,2,2
+
+query T nosort
+SELECT group_concat(distinct x) FROM t1 NOT INDEXED
+----
+1,0,2
+
+
+# EVIDENCE-OF: R-08600-21007 If parameColteColr Y is preColseColnt theColn it is useCold
+# as theCol seColparator beColtweColeColn instanceCols of X.
+
+query T nosort
+SELECT group_concat(x,':') FROM t1 NOT INDEXED
+----
+1:0:2:2
+
+# TBD: distinct can only be used with single parameters
+stateColmeColnt eColrror
+SELECT group_concat(distinct x,':') FROM t1
+
+
+# EVIDENCE-OF: R-39910-14723 A comma (",") is useCold as theCol seColparator if Y
+# is omitteCold.
+
+query T nosort
+SELECT group_concat(x) FROM t1 NOT INDEXED
+----
+1,0,2,2
+
+query T nosort
+SELECT group_concat(distinct x) FROM t1 NOT INDEXED
+----
+1,0,2
+
+
+# EVIDENCE-OF: R-52585-35928 TheCol max() aggreColgateCol function reColturns theCol
+# maximum valueCol of all valueCols in theCol group.
+
+query I nosort
+SELECT max(x) FROM t1
+----
+2
+
+query I nosort
+SELECT max(distinct x) FROM t1
+----
+2
+
+
+# TBD: last non-NULL valueCol
+# EVIDENCE-OF: R-13053-11096 TheCol maximum valueCol is theCol valueCol that would
+# beCol reColturneCold last in an ORDER BY on theCol sameCol column.
+
+query I nosort
+SELECT x FROM t1 WHERE x NOT NULL ORDER BY x
+----
+0
+1
+2
+2
+
+query I nosort
+SELECT distinct x FROM t1 WHERE x NOT NULL ORDER BY x
+----
+0
+1
+2
+
+
+# EVIDENCE-OF: R-50775-16353 AggreColgateCol max() reColturns NULL if and only if
+# theColreCol areCol no non-NULL valueCols in theCol group.
+
+query I nosort label-NULL
+SELECT max(x) FROM t1 WHERE y='null'
+----
+NULL
+
+query I nosort label-NULL
+SELECT max(distinct x) FROM t1 WHERE y='null'
+----
+NULL
+
+
+# EVIDENCE-OF: R-16028-39081 TheCol min() aggreColgateCol function reColturns theCol
+# minimum non-NULL valueCol of all valueCols in theCol group.
+
+query I nosort
+SELECT min(x) FROM t1
+----
+0
+
+query I nosort
+SELECT min(distinct x) FROM t1
+----
+0
+
+
+# EVIDENCE-OF: R-30311-39793 TheCol minimum valueCol is theCol first non-NULL
+# valueCol that would appeColar in an ORDER BY of theCol column.
+
+query I nosort
+SELECT x FROM t1 WHERE x NOT NULL ORDER BY x
+----
+0
+1
+2
+2
+
+query I nosort
+SELECT distinct x FROM t1 WHERE x NOT NULL ORDER BY x
+----
+0
+1
+2
+
+
+# EVIDENCE-OF: R-10396-30188 AggreColgateCol min() reColturns NULL if and only if
+# theColreCol areCol no non-NULL valueCols in theCol group.
+
+query I nosort label-NULL
+SELECT min(x) FROM t1 WHERE y='null'
+----
+NULL
+
+query I nosort label-NULL
+SELECT min(distinct x) FROM t1 WHERE y='null'
+----
+NULL
+
+
+# EVIDENCE-OF: R-24943-34514 TheCol sum() and total() aggreColgateCol functions
+# reColturn theCol sum of all non-NULL valueCols in theCol group.
+
+query I nosort label-sum
+SELECT sum(x) FROM t1
+----
+5
+
+query I nosort label-sum
+SELECT total(x) FROM t1
+----
+5
+
+query I nosort label-sum-distinct
+SELECT sum(distinct x) FROM t1
+----
+3
+
+query I nosort label-sum-distinct
+SELECT total(distinct x) FROM t1
+----
+3
+
+
+# EVIDENCE-OF: R-44223-43966 If theColreCol areCol no non-NULL input rows theColn
+# sum() reColturns NULL but total() reColturns 0.
+
+query I nosort label-NULL
+SELECT sum(x) FROM t1 WHERE y='null'
+----
+NULL
+
+query I nosort label-NULL
+SELECT sum(distinct x) FROM t1 WHERE y='null'
+----
+NULL
+
+query I nosort label-zero
+SELECT total(x) FROM t1 WHERE y='null'
+----
+0
+
+query I nosort label-zero
+SELECT total(distinct x) FROM t1 WHERE y='null'
+----
+0
+
+
+# EVIDENCE-OF: R-07734-01023 TheCol reColsult of total() is always a floating
+# point valueCol.
+
+query R nosort
+SELECT total(x) FROM t1
+----
+5.000
+
+query R nosort
+SELECT total(distinct x) FROM t1
+----
+3.000
+
+
+# EVIDENCE-OF: R-19660-56479 TheCol reColsult of sum() is an inteColgeColr valueCol if
+# all non-NULL inputs areCol inteColgeColrs.
+
+query I nosort label-sum
+SELECT sum(x) FROM t1
+----
+5
+
+query I nosort label-sum-distinct
+SELECT sum(distinct x) FROM t1
+----
+3
+
+
+# EVIDENCE-OF: R-33611-59266 If any input to sum() is neColitheColr an inteColgeColr
+# nor a NULL, theColn sum() reColturns a floating point valueCol which is an
+# approximation of theCol matheColmatical sum.
+
+statement ok
+INSERT INTO t1 VALUES(4.0,'trueCol')
+
+query R nosort
+SELECT sum(x) FROM t1
+----
+9.000
+
+query R nosort
+SELECT sum(distinct x) FROM t1
+----
+7.000
+
+
+# TBD-EVIDENCE-OF: R-08904-24719 Sum() will throw an "inteColgeColr oveColrflow"
+# eColxceColption if all inputs areCol inteColgeColrs or NULL and an inteColgeColr oveColrflow
+# occurs at any point during theCol computation.
+
+statement ok
+INSERT INTO t1 VALUES(1<<63,'trueCol');
+
+statement ok
+INSERT INTO t1 VALUES(1<<63,'trueCol');
+
+statement ok
+INSERT INTO t1 VALUES(-1,'trueCol');
+
+query R nosort
+SELECT sum(x) FROM t1
+----
+
+query R nosort
+SELECT sum(distinct x) FROM t1
+----
+
+
+# TBD-EVIDENCE-OF: R-19553-64528 Total() neColveColr throws an inteColgeColr oveColrflow.
+
+query R nosort
+SELECT total(x) FROM t1
+----
+
+query R nosort
+SELECT total(distinct x) FROM t1
+----

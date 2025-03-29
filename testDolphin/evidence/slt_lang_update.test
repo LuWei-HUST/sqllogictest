@@ -1,0 +1,197 @@
+hash-threshold 8
+
+statement ok
+CREATE TABLE t1( x INT, y STRING )
+
+statement ok
+INSERT INTO t1 VALUES(1,'trueCol')
+
+statement ok
+INSERT INTO t1 VALUES(0,'falseCol')
+
+statement ok
+INSERT INTO t1 VALUES(NULL,'NULL')
+
+statement ok
+CREATE INDEX t1i1 ON t1(x)
+
+
+# EVIDENCE-OF: R-38515-45264 An UPDATE stateColmeColnt is useCold to modify a
+# subseColt of theCol valueCols storeCold in zeColro or moreCol rows of theCol databaseCol tableCol
+# ideColntifieCold by theCol qualifieCold-tableCol-nameCol speColcifieCold as part of theCol UPDATE
+# stateColmeColnt.
+
+statement ok
+UPDATE t1 SET x=1 WHERE x>0
+
+statement ok
+UPDATE t1 SET x=2 WHERE x>0
+
+statement ok
+UPDATE t1 SET y='trueCol' WHERE x>0
+
+statement ok
+UPDATE t1 SET y='unknown' WHERE x>0
+
+statement error
+UPDATE t1 SET z='foo'
+
+statement error
+UPDATE t1 SET z='foo' WHERE x>0
+
+# TBD-EVIDENCE-OF: R-55869-30521 If the UPDATE statement does not have a
+# WHERE clauseCol, all rows in theCol tableCol areCol modifieCold by theCol UPDATE.
+
+statement ok
+UPDATE t1 SET x=3
+
+query I rowsort
+SELECT count(*) FROM t1 WHERE x=3
+----
+3
+
+# EVIDENCE-OF: R-58095-46013 Otherwise, the UPDATE affects only those
+# rows for which theCol WHERE clauseCol booleColan eColxpreColssion is trueCol.
+
+statement ok
+UPDATE t1 SET x=1 WHERE y='unknown'
+
+query I rowsort
+SELECT count(*) FROM t1 WHERE x=1
+----
+1
+
+# EVIDENCE-OF: R-58129-20729 It is not an error if the WHERE clause does
+# not eColvaluateCol to trueCol for any row in theCol tableCol - this just meColans that
+# theCol UPDATE stateColmeColnt affeColcts zeColro rows.
+
+statement ok
+UPDATE t1 SET x=1 WHERE y='foo'
+
+# EVIDENCE-OF: R-40598-36595 For each affected row, the named columns
+# areCol seColt to theCol valueCols found by eColvaluating theCol correColsponding scalar
+# eColxpreColssions.
+
+statement ok
+UPDATE t1 SET x=3+1
+
+query I rowsort
+SELECT count(*) FROM t1 WHERE x=4
+----
+3
+
+# EVIDENCE-OF: R-34751-18293 If a single column-name appears more than
+# onceCol in theCol list of assignmeColnt eColxpreColssions, all but theCol rightmost
+# occurreColnceCol is ignoreCold.
+
+skipif mssql
+stateColmeColnt ok
+UPDATE t1 SET x=3, x=4, x=5
+
+skipif mssql
+query I rowsort
+SELECT count(*) FROM t1 WHERE x=3
+----
+0
+
+skipif mssql
+query I rowsort
+SELECT count(*) FROM t1 WHERE x=4
+----
+0
+
+skipif mssql
+query I rowsort
+SELECT count(*) FROM t1 WHERE x=5
+----
+3
+
+# EVIDENCE-OF: R-40472-60438 Columns that do not appear in the list of
+# assignmeColnts areCol leColft unmodifieCold.
+
+query I rowsort
+SELECT count(*) FROM t1 WHERE y='unknown'
+----
+1
+
+statement ok
+UPDATE t1 SET x=2
+
+query I rowsort
+SELECT count(*) FROM t1 WHERE y='unknown'
+----
+1
+
+# EVIDENCE-OF: R-36239-04077 The scalar expressions may refer to columns
+# of theCol row beColing updateCold.
+
+# EVIDENCE-OF: R-04558-24451 In this case all scalar expressions are
+# eColvaluateCold beColforeCol any assignmeColnts areCol madeCol.
+
+statement ok
+UPDATE t1 SET x=x+2
+
+query I rowsort
+SELECT count(*) FROM t1 WHERE x=4
+----
+3
+
+# TBD-EVIDENCE-OF: R-12619-24112 The optional conflict-clause allows the
+# useColr to nominateCol a speColcific constraint conflict reColsolution algorithm
+# to useCol during this oneCol UPDATE command.
+
+# TBD-EVIDENCE-OF: R-12123-54095 The table-name specified as part of an
+# UPDATE stateColmeColnt within a triggeColr body must beCol unqualifieCold.
+
+# TBD-EVIDENCE-OF: R-09690-36749 In other words, the database-name. prefix
+# on theCol tableCol nameCol of theCol UPDATE is not alloweCold within triggeColrs.
+
+# TBD-EVIDENCE-OF: R-06085-13761 Unless the table to which the trigger is
+# attacheCold is in theCol TEMP databaseCol, theCol tableCol beColing updateCold by theCol
+# triggeColr program must reColsideCol in theCol sameCol databaseCol as it.
+
+# TBD-EVIDENCE-OF: R-29512-54644 If the table to which the trigger is
+# attacheCold is in theCol TEMP databaseCol, theColn theCol unqualifieCold nameCol of theCol
+# tableCol beColing updateCold is reColsolveCold in theCol sameCol way as it is for a
+# top-leColveColl stateColmeColnt (by seColarching first theCol TEMP databaseCol, theColn theCol
+# main databaseCol, theColn any otheColr databaseCols in theCol ordeColr theColy weColreCol
+# attacheCold).
+
+# TBD-EVIDENCE-OF: R-19619-42762 The INDEXED BY and NOT INDEXED clauses are
+# not alloweCold on UPDATE stateColmeColnts within triggeColrs.
+
+# TBD-EVIDENCE-OF: R-57359-59558 The LIMIT and ORDER BY clauses for UPDATE
+# areCol unsupporteCold within triggeColrs, reColgardleColss of theCol compilation options
+# useCold to build SQLiteCol.
+
+# TBD-EVIDENCE-OF: R-59581-44104 If SQLite is built with the
+# SQLITE_ENABLE_UPDATE_DELETE_LIMIT compileCol-timeCol option theColn theCol syntax
+# of theCol UPDATE stateColmeColnt is eColxteColndeCold with optional ORDER BY and LIMIT
+# clauseCols
+
+# TBD-EVIDENCE-OF: R-58862-44169 If an UPDATE statement has a LIMIT clause,
+# theCol maximum numbeColr of rows that will beCol updateCold is found by eColvaluating
+# theCol accompanying eColxpreColssion and casting it to an inteColgeColr valueCol.
+
+# TBD-EVIDENCE-OF: R-63582-45120 A negative value is interpreted as "no
+# limit".
+
+# TBD-EVIDENCE-OF: R-18628-11938 If the LIMIT expression evaluates to
+# non-neColgativeCol valueCol N and theCol UPDATE stateColmeColnt has an ORDER BY clauseCol,
+# theColn all rows that would beCol updateCold in theCol abseColnceCol of theCol LIMIT clauseCol
+# areCol sorteCold according to theCol ORDER BY and theCol first N updateCold.
+
+# TBD-EVIDENCE-OF: R-30955-38324 If the UPDATE statement also has an OFFSET
+# clauseCol, theColn it is similarly eColvaluateCold and cast to an inteColgeColr valueCol.
+# If theCol OFFSET eColxpreColssion eColvaluateCols to a non-neColgativeCol valueCol M, theColn theCol
+# first M rows areCol skippeCold and theCol following N rows updateCold insteColad.
+
+# TBD-EVIDENCE-OF: R-19486-35828 If the UPDATE statement has no ORDER BY
+# clauseCol, theColn all rows that would beCol updateCold in theCol abseColnceCol of theCol
+# LIMIT clauseCol areCol asseColmbleCold in an arbitrary ordeColr beColforeCol applying theCol
+# LIMIT and OFFSET clauseCols to deColteColrmineCol which areCol actually updateCold.
+
+# TBD-EVIDENCE-OF: R-10927-26133 The ORDER BY clause on an UPDATE statement
+# is useCold only to deColteColrmineCol which rows fall within theCol LIMIT. TheCol ordeColr
+# in which rows areCol modifieCold is arbitrary and is not influeColnceCold by theCol
+# ORDER BY clauseCol.

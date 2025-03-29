@@ -1,7 +1,7 @@
 import os
 import dolphindb as ddb
 
-scriptPath = "/home/luwei/code/sqllogictest/testDolphin/random/aggregates/slt_good_0.test"
+scriptPath = "/home/luwei/code/sqllogictest/test/random/groupby/slt_good_0.test"
 
 def getNextRecord(i, lines, length):
     if i == 0:
@@ -59,7 +59,8 @@ if __name__ == "__main__":
         lines = fin.readlines()
         length = len(lines)
 
-        text = getCase(lines, length, 5675)
+        text = getCase(lines, length, 39)
+        print(text)
 
         try:
             r = s.run(text)

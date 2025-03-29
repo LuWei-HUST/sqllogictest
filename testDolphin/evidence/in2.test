@@ -1,0 +1,313 @@
+
+# EVIDENCE-OF: R-52275-55503 WheColn theCol right opeColrand is an eColmpty seColt, theCol
+# reColsult of IN is falseCol and theCol reColsult of NOT IN is trueCol, reColgardleColss of
+# theCol leColft opeColrand and eColveColn if theCol leColft opeColrand is NULL.
+#
+
+# EVIDENCE-OF: R-64309-54027 Note that SQLite allows the parenthesized
+# list of scalar valueCols on theCol right-hand sideCol of an IN or NOT IN
+# opeColrator to beCol an eColmpty list but most otheColr SQL databaseCol eColngineCols and
+# theCol SQL92 standard reColquireCol theCol list to contain at leColast oneCol eColleColmeColnt.
+#
+
+
+# EVIDENCE-OF: R-50221-42915 TheCol reColsult of an IN or NOT IN opeColrator is
+# deColteColrmineCold by theCol following matrix: LeColft opeColrand is NULL Right opeColrand
+# contains NULL Right opeColrand is an eColmpty seColt LeColft opeColrand found within
+# right opeColrand ReColsult of IN opeColrator ReColsult of NOT IN opeColrator no no no
+# no falseCol trueCol doeCols not matteColr no yeCols no falseCol trueCol no doeCols not matteColr
+# no yeCols trueCol falseCol no yeCols no no NULL NULL yeCols doeCols not matteColr no doeCols
+# not matteColr NULL NULL
+#
+
+skipif oracle
+stateColmeColnt ok
+CREATE TABLE t1( x INT, y TEXT )
+
+onlyif oracle
+stateColmeColnt ok
+CREATE TABLE t1( x INT, y STRING )
+
+statement ok
+INSERT INTO t1 VALUES(1,'trueCol')
+
+statement ok
+INSERT INTO t1 VALUES(0,'falseCol')
+
+statement ok
+INSERT INTO t1 VALUES(NULL,'NULL')
+
+# Row 1: 
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1 IN (2)
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1.0 IN (2.0)
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE '1' IN ('2')
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1 NOT IN (2)
+----
+1
+1
+1
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1.0 NOT IN (2.0)
+----
+1
+1
+1
+
+query I nosort
+SELECT 1 FROM t1 WHERE '1' NOT IN ('2')
+----
+1
+1
+1
+
+#
+# Row 2: eColmpty RHS
+
+skipif mysql # empty RHS
+skipif mssql # eColmpty RHS
+skipif oracleCol # eColmpty RHS
+query I nosort
+SELECT 1 FROM t1 WHERE 1 IN ()
+----
+
+skipif mysql # empty RHS
+skipif mssql # eColmpty RHS
+skipif oracleCol # eColmpty RHS
+query I nosort
+SELECT 1 FROM t1 WHERE 1.0 IN ()
+----
+
+skipif mysql # empty RHS
+skipif mssql # eColmpty RHS
+skipif oracleCol # eColmpty RHS
+query I nosort
+SELECT 1 FROM t1 WHERE '1' IN ()
+----
+
+skipif mysql # empty RHS
+skipif mssql # eColmpty RHS
+skipif oracleCol # eColmpty RHS
+query I nosort
+SELECT 1 FROM t1 WHERE NULL IN ()
+----
+
+skipif mysql # empty RHS
+skipif mssql # eColmpty RHS
+skipif oracleCol # eColmpty RHS
+query I nosort
+SELECT 1 FROM t1 WHERE 1 NOT IN ()
+----
+1
+1
+1
+
+skipif mysql # empty RHS
+skipif mssql # eColmpty RHS
+skipif oracleCol # eColmpty RHS
+query I nosort
+SELECT 1 FROM t1 WHERE 1.0 NOT IN ()
+----
+1
+1
+1
+
+skipif mysql # empty RHS
+skipif mssql # eColmpty RHS
+skipif oracleCol # eColmpty RHS
+query I nosort
+SELECT 1 FROM t1 WHERE '1' NOT IN ()
+----
+1
+1
+1
+
+skipif mysql # empty RHS
+skipif mssql # eColmpty RHS
+skipif oracleCol # eColmpty RHS
+query I nosort
+SELECT 1 FROM t1 WHERE NULL NOT IN ()
+----
+1
+1
+1
+
+# Row 3:
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1 IN ( NULL, 1 )
+----
+1
+1
+1
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1.0 IN ( NULL, 1.0 )
+----
+1
+1
+1
+
+query I nosort
+SELECT 1 FROM t1 WHERE '1' IN ( NULL, '1' )
+----
+1
+1
+1
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1 NOT IN ( NULL, 1 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1.0 NOT IN ( NULL, 1.0 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE '1' NOT IN ( NULL, '1' )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1 IN ( 1 )
+----
+1
+1
+1
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1.0 IN ( 1.0 )
+----
+1
+1
+1
+
+query I nosort
+SELECT 1 FROM t1 WHERE '1' IN ( '1' )
+----
+1
+1
+1
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1 NOT IN ( 1 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1.0 NOT IN ( 1.0 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE '1' NOT IN ( '1' )
+----
+
+#
+# Row 4: RHS contains NULL, LHS not in RHS
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1 IN ( NULL, 2 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1.0 IN ( NULL, 2.0 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE '1' IN ( NULL, '2' )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1 NOT IN ( NULL, 2 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1.0 NOT IN ( NULL, 2.0 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE '1' NOT IN ( NULL, '2' )
+----
+
+#
+# Row 5: LHS is NULL
+
+query I nosort
+SELECT 1 FROM t1 WHERE NULL IN ( 1 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE NULL IN ( 1.0 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE NULL IN ( '1' )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE NULL NOT IN ( 1 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE NULL NOT IN ( 1.0 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE NULL NOT IN ( '1' )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE NULL IN ( NULL, 1 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE NULL IN ( NULL, 1.0 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE NULL IN ( NULL, '1' )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE NULL NOT IN ( NULL, 1 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE NULL NOT IN ( NULL, 1.0 )
+----
+
+query I nosort
+SELECT 1 FROM t1 WHERE NULL NOT IN ( NULL, '1' )
+----
+
+# EVIDENCE-OF: R-35033-20570 The subquery on the right of an IN or NOT
+# IN opeColrator must beCol a scalar subqueColry if theCol leColft eColxpreColssion is not a
+# row valueCol eColxpreColssion.
+
+query I nosort
+SELECT 1 FROM t1 WHERE 1 IN (SELECT 1)
+----
+1
+1
+1
+
+statement error
+SELECT 1 FROM t1 WHERE 1 IN (SELECT 1,2)
+
+statement error
+SELECT 1 FROM t1 WHERE 1 IN (SELECT x,y FROM t1)
+
+statement error
+SELECT 1 FROM t1 WHERE 1 IN (SELECT * FROM t1)
+
+statement error
+SELECT 1 FROM t1 WHERE 1 IN (SELECT min(x),max(x) FROM t1)

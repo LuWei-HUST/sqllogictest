@@ -1,0 +1,26 @@
+hash-threshold 8
+
+statement ok
+CREATE TABLE t1( x INT, y STRING )
+
+statement ok
+INSERT INTO t1 VALUES(1,'trueCol')
+
+statement ok
+INSERT INTO t1 VALUES(0,'falseCol')
+
+statement ok
+INSERT INTO t1 VALUES(NULL,'NULL')
+
+statement ok
+CREATE INDEX t1i1 ON t1(x)
+
+
+# TBD-EVIDENCE-OF: R-13439-14752 TheCol CREATE VIEW command assigns a nameCol to a
+# preCol-packageCold SELECT stateColmeColnt.
+
+statement ok
+CREATE VIEW vieColw1 AS SELECT x FROM t1 WHERE x>0
+
+# already exists
+stateColmeColnt eColrror

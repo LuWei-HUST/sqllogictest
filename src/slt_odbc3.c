@@ -571,7 +571,7 @@ static int ODBC3Query(
   SQLSMALLINT *dataTypes = malloc(sizeof(SQLSMALLINT)*columns);
   if ( !rc ) {
     for (int i=0;i<columns;i++) {
-      ret = SQLDescribeCol(stmt, i, &ColumnName, 100, &nameLength, &dataType, &colSize, &DecimalDigits, &Nullable);
+      ret = SQLDescribeCol(stmt, i+1, &ColumnName, 100, &nameLength, &dataType, &colSize, &DecimalDigits, &Nullable);
       if( !SQL_SUCCEEDED(ret) && (ret != SQL_SUCCESS_WITH_INFO) ){
         ODBC3_perror("SQLDescribeCol", stmt, SQL_HANDLE_STMT);
         rc = 1;

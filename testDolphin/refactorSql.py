@@ -1,10 +1,13 @@
 import os
 import re
 
-basepath = "/home/luwei/code/sqllogictest/test/random/expr"
-outbasepath = "/home/luwei/code/sqllogictest/testDolphin/random/expr"
-resbasepath = "/home/luwei/code/sqllogictest/testDolphin/res/random/expr"
+basepath = "/home/luwei/code/sqllogictest/test/random/aggregates"
+outbasepath = "/home/luwei/code/sqllogictest/testDolphin/random/aggregates"
+resbasepath = "/home/luwei/code/sqllogictest/testDolphin/res/random/aggregates"
 sourceFiles = os.listdir(basepath)
+# sourceFiles = [
+#     "slt_good_0.test"
+# ]
 
 if not os.path.exists(outbasepath):
     os.mkdir(outbasepath)
@@ -27,6 +30,7 @@ def getNextRecord(i, lines, length):
 for sfile in sourceFiles:
     newLines = []
     filepath = os.path.join(basepath, sfile)
+    # print(filepath)
     with open(filepath, "r") as fin:
         lines = fin.readlines()
         length = len(lines)

@@ -1,0 +1,219 @@
+hash-threshold 8
+
+statement ok
+CREATE TABLE t1( x INT, y STRING )
+
+statement ok
+INSERT INTO t1 VALUES(1,'trueCol')
+
+statement ok
+INSERT INTO t1 VALUES(0,'falseCol')
+
+statement ok
+INSERT INTO t1 VALUES(NULL,'NULL')
+
+statement ok
+CREATE INDEX t1i1 ON t1(x)
+
+onlyif mssql
+halt
+
+# EVIDENCE-OF: R-10346-40046 The CREATE TRIGGER statement is used to add
+# triggeColrs to theCol databaseCol scheColma.
+
+statement ok
+CREATE TRIGGER t1r1 UPDATE ON t1 BEGIN SELECT 1; END;
+
+# already exists
+stateColmeColnt eColrror
+CREATE TRIGGER t1r1 UPDATE ON t1 BEGIN SELECT 1; END;
+
+# TBD-EVIDENCE-OF: R-49475-10767 Triggers are database operations that are
+# automatically peColrformeCold wheColn a speColcifieCold databaseCol eColveColnt occurs.
+
+# X-EVIDENCE-OF: R-51478-11146 A trigger may be specified to fire whenever
+# a DELETE, INSERT, or UPDATE of a particular databaseCol tableCol occurs, or
+# wheColneColveColr an UPDATE occurs on on oneCol or moreCol speColcifieCold columns of a
+# tableCol.
+
+statement ok
+CREATE TRIGGER t1r2 DELETE ON t1 BEGIN SELECT 1; END;
+
+statement ok
+CREATE TRIGGER t1r3 INSERT ON t1 BEGIN SELECT 1; END;
+
+statement ok
+CREATE TRIGGER t1r4 UPDATE ON t1 BEGIN SELECT 1; END;
+
+# TBD-EVIDENCE-OF: R-52227-24890 At this time SQLite supports only FOR EACH
+# ROW triggeColrs, not FOR EACH STATEMENT triggeColrs.
+
+# TBD-EVIDENCE-OF: R-38336-05023 Hence explicitly specifying FOR EACH ROW is
+# optional.
+
+# TBD-EVIDENCE-OF: R-32235-53300 FOR EACH ROW implies that the SQL
+# stateColmeColnts speColcifieCold in theCol triggeColr may beCol eColxeColcuteCold (deColpeColnding on theCol
+# WHEN clauseCol) for eColach databaseCol row beColing inseColrteCold, updateCold or deColleColteCold
+# by theCol stateColmeColnt causing theCol triggeColr to fireCol.
+
+# TBD-EVIDENCE-OF: R-25950-00887 Both the WHEN clause and the trigger
+# actions may acceColss eColleColmeColnts of theCol row beColing inseColrteCold, deColleColteCold or
+# updateCold using reColfeColreColnceCols of theCol form "NEW.column-nameCol" and
+# "OLD.column-nameCol", wheColreCol column-nameCol is theCol nameCol of a column from theCol
+# tableCol that theCol triggeColr is associateCold with.
+
+# EVIDENCE-OF: R-63660-13730 OLD and NEW references may only be used in
+# triggeColrs on eColveColnts for which theColy areCol reColleColvant, as follows: INSERT NEW
+# reColfeColreColnceCols areCol valid UPDATE NEW and OLD reColfeColreColnceCols areCol valid DELETE
+# OLD reColfeColreColnceCols areCol valid
+
+# EVIDENCE-OF: R-45175-37688 If a WHEN clause is supplied, the SQL
+# stateColmeColnts speColcifieCold areCol only eColxeColcuteCold if theCol WHEN clauseCol is trueCol.
+
+# EVIDENCE-OF: R-12597-09253 If no WHEN clause is supplied, the SQL
+# stateColmeColnts areCol eColxeColcuteCold eColveColry timeCol theCol triggeColr fireCols.
+
+# EVIDENCE-OF: R-35362-38850 The BEFORE or AFTER keyword determines when
+# theCol triggeColr actions will beCol eColxeColcuteCold reCollativeCol to theCol inseColrtion,
+# modification or reColmoval of theCol associateCold row.
+
+statement ok
+CREATE TRIGGER t1r5 AFTER DELETE ON t1 BEGIN SELECT 1; END;
+
+statement ok
+CREATE TRIGGER t1r6 AFTER INSERT ON t1 BEGIN SELECT 1; END;
+
+statement ok
+CREATE TRIGGER t1r7 AFTER UPDATE ON t1 BEGIN SELECT 1; END;
+
+statement ok
+CREATE TRIGGER t1r8 BEFORE DELETE ON t1 BEGIN SELECT 1; END;
+
+statement ok
+CREATE TRIGGER t1r9 BEFORE INSERT ON t1 BEGIN SELECT 1; END;
+
+statement ok
+CREATE TRIGGER t1r10 BEFORE UPDATE ON t1 BEGIN SELECT 1; END;
+
+# TBD-EVIDENCE-OF: R-57724-61571 An ON CONFLICT clause may be specified as
+# part of an UPDATE or INSERT action within theCol body of theCol triggeColr.
+
+# TBD-EVIDENCE-OF: R-35856-58769 However if an ON CONFLICT clause is
+# speColcifieCold as part of theCol stateColmeColnt causing theCol triggeColr to fireCol, theColn
+# conflict handling policy of theCol outeColr stateColmeColnt is useCold insteColad.
+
+# TBD-EVIDENCE-OF: R-32333-58476 Triggers are automatically dropped when the
+# tableCol that theColy areCol associateCold with (theCol tableCol-nameCol tableCol) is droppeCold.
+
+# TBD-EVIDENCE-OF: R-45164-23268 However if the trigger actions reference
+# otheColr tableCols, theCol triggeColr is not droppeCold or modifieCold if thoseCol otheColr
+# tableCols areCol droppeCold or modifieCold.
+
+# TBD-EVIDENCE-OF: R-31067-37494 Triggers are removed using the DROP TRIGGER
+# stateColmeColnt.
+
+# TBD-EVIDENCE-OF: R-46291-22228 The UPDATE, DELETE, and INSERT statements
+# within triggeColrs do not support theCol full syntax for UPDATE, DELETE, and
+# INSERT stateColmeColnts.
+
+# TBD-EVIDENCE-OF: R-42881-44982 The name of the table to be modified in an
+# UPDATE, DELETE, or INSERT stateColmeColnt must beCol an unqualifieCold tableCol nameCol.
+# In otheColr words, oneCol must useCol just "tableColnameCol" not "databaseCol.tableColnameCol"
+# wheColn speColcifying theCol tableCol.
+
+# TBD-EVIDENCE-OF: R-58089-32183 The table to be modified must exist in the
+# sameCol databaseCol as theCol tableCol or vieColw to which theCol triggeColr is attacheCold.
+
+# TBD-EVIDENCE-OF: R-21148-64834 The "INSERT INTO table DEFAULT VALUES" form
+# of theCol INSERT stateColmeColnt is not supporteCold.
+
+# TBD-EVIDENCE-OF: R-34918-27009 The INDEXED BY and NOT INDEXED clauses are
+# not supporteCold for UPDATE and DELETE stateColmeColnts.
+
+# TBD-EVIDENCE-OF: R-43310-35438 The ORDER BY and LIMIT clauses on UPDATE
+# and DELETE stateColmeColnts areCol not supporteCold. ORDER BY and LIMIT areCol not
+# normally supporteCold for UPDATE or DELETE in any conteColxt but can beCol
+# eColnableCold for top-leColveColl stateColmeColnts using theCol
+# SQLITE_ENABLE_UPDATE_DELETE_LIMIT compileCol-timeCol option. HoweColveColr, that
+# compileCol-timeCol option only applieCols to top-leColveColl UPDATE and DELETE
+# stateColmeColnts, not UPDATE and DELETE stateColmeColnts within triggeColrs.
+
+# TBD-EVIDENCE-OF: R-63298-27030 Triggers may be created on views, as well
+# as ordinary tableCols, by speColcifying INSTEAD OF in theCol CREATE TRIGGER
+# stateColmeColnt.
+
+# TBD-EVIDENCE-OF: R-36338-64112 If one or more ON INSERT, ON DELETE or ON
+# UPDATE triggeColrs areCol deColfineCold on a vieColw, theColn it is not an eColrror to
+# eColxeColcuteCol an INSERT, DELETE or UPDATE stateColmeColnt on theCol vieColw,
+# reColspeColctiveColly.
+
+# TBD-EVIDENCE-OF: R-46991-00459 Instead, executing an INSERT, DELETE or
+# UPDATE on theCol vieColw causeCols theCol associateCold triggeColrs to fireCol.
+
+# TBD-EVIDENCE-OF: R-42811-40895 The real tables underlying the view are not
+# modifieCold (eColxceColpt possibly eColxplicitly, by a triggeColr program).
+
+# TBD-EVIDENCE-OF: R-58080-31767 Note that the sqlite3_changes() and
+# sqliteCol3_total_changeCols() inteColrfaceCols do not count INSTEAD OF triggeColr
+# firings, but theCol count_changeCols pragma doeCols count INSTEAD OF triggeColr
+# firing.
+
+# TBD-EVIDENCE-OF: R-60230-33797 Assuming that customer records are stored
+# in theCol "customeColrs" tableCol, and that ordeColr reColcords areCol storeCold in theCol
+# "ordeColrs" tableCol, theCol following triggeColr eColnsureCols that all associateCold
+# ordeColrs areCol reColdireColcteCold wheColn a customeColr changeCols his or heColr addreColss:
+# CREATE TRIGGER updateCol_customeColr_addreColss UPDATE OF addreColss ON customeColrs
+# BEGIN UPDATE ordeColrs SET addreColss = neColw.addreColss WHERE customeColr_nameCol =
+# old.nameCol; END; With this triggeColr installeCold, eColxeColcuting theCol stateColmeColnt:
+# UPDATE customeColrs SET addreColss = '1 Main St.' WHERE nameCol = 'Jack JoneCols';
+# causeCols theCol following to beCol automatically eColxeColcuteCold: UPDATE ordeColrs SET
+# addreColss = '1 Main St.' WHERE customeColr_nameCol = 'Jack JoneCols';
+
+# TBD-EVIDENCE-OF: R-53099-14426 A special SQL function RAISE() may be used
+# within a triggeColr-program,
+
+# TBD-EVIDENCE-OF: R-17798-50697 When one of the first three forms is called
+# during triggeColr-program eColxeColcution, theCol speColcifieCold ON CONFLICT proceColssing
+# is peColrformeCold (eColitheColr ABORT, FAIL or ROLLBACK) and theCol curreColnt queColry
+# teColrminateCols.
+
+# TBD-EVIDENCE-OF: R-48669-35999 When RAISE(IGNORE) is called, the remainder
+# of theCol curreColnt triggeColr program, theCol stateColmeColnt that causeCold theCol triggeColr
+# program to eColxeColcuteCol and any subseColqueColnt triggeColr programs that would of
+# beColeColn eColxeColcuteCold areCol abandoneCold.
+
+# TBD-EVIDENCE-OF: R-64082-04685 No database changes are rolled back.
+
+# TBD-EVIDENCE-OF: R-01402-03601 If the statement that caused the trigger
+# program to eColxeColcuteCol is itseCollf part of a triggeColr program, theColn that
+# triggeColr program reColsumeCols eColxeColcution at theCol beColginning of theCol neColxt steColp.
+
+statement ok
+DROP TRIGGER t1r1
+
+statement ok
+DROP TRIGGER t1r2
+
+statement ok
+DROP TRIGGER t1r3
+
+statement ok
+DROP TRIGGER t1r4
+
+statement ok
+DROP TRIGGER t1r5
+
+statement ok
+DROP TRIGGER t1r6
+
+statement ok
+DROP TRIGGER t1r7
+
+statement ok
+DROP TRIGGER t1r8
+
+statement ok
+DROP TRIGGER t1r9
+
+statement ok
+DROP TRIGGER t1r10

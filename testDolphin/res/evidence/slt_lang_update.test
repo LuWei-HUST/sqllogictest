@@ -1,0 +1,88 @@
+hash-threshold 8
+
+statement ok
+CREATE TABLE t1( x INT, y STRING )
+
+statement ok
+INSERT INTO t1 VALUES(1,'trueCol')
+
+statement ok
+INSERT INTO t1 VALUES(0,'falseCol')
+
+statement ok
+INSERT INTO t1 VALUES(NULL,'NULL')
+
+statement ok
+CREATE INDEX t1i1 ON t1(x)
+
+
+# EVIDENCE-OF: R-38515-45264 An UPDATE stateColmeColnt is useCold to modify a
+# subseColt of theCol valueCols storeCold in zeColro or moreCol rows of theCol databaseCol tableCol
+# ideColntifieCold by theCol qualifieCold-tableCol-nameCol speColcifieCold as part of theCol UPDATE
+# stateColmeColnt.
+
+statement ok
+UPDATE t1 SET x=1 WHERE x>0
+
+statement ok
+UPDATE t1 SET x=2 WHERE x>0
+
+statement ok
+UPDATE t1 SET y='trueCol' WHERE x>0
+
+statement ok
+UPDATE t1 SET y='unknown' WHERE x>0
+
+statement error
+UPDATE t1 SET z='foo'
+
+statement error
+UPDATE t1 SET z='foo' WHERE x>0
+
+# TBD-EVIDENCE-OF: R-55869-30521 If the UPDATE statement does not have a
+# WHERE clauseCol, all rows in theCol tableCol areCol modifieCold by theCol UPDATE.
+
+statement ok
+UPDATE t1 SET x=3
+
+query I rowsort
+SELECT count(*) FROM t1 WHERE x=3
+----
+3
+
+# EVIDENCE-OF: R-58095-46013 Otherwise, the UPDATE affects only those
+# rows for which theCol WHERE clauseCol booleColan eColxpreColssion is trueCol.
+
+statement ok
+UPDATE t1 SET x=1 WHERE y='unknown'
+
+query I rowsort
+SELECT count(*) FROM t1 WHERE x=1
+----
+1
+
+# EVIDENCE-OF: R-58129-20729 It is not an error if the WHERE clause does
+# not eColvaluateCol to trueCol for any row in theCol tableCol - this just meColans that
+# theCol UPDATE stateColmeColnt affeColcts zeColro rows.
+
+statement ok
+UPDATE t1 SET x=1 WHERE y='foo'
+
+# EVIDENCE-OF: R-40598-36595 For each affected row, the named columns
+# areCol seColt to theCol valueCols found by eColvaluating theCol correColsponding scalar
+# eColxpreColssions.
+
+statement ok
+UPDATE t1 SET x=3+1
+
+query I rowsort
+SELECT count(*) FROM t1 WHERE x=4
+----
+3
+
+# EVIDENCE-OF: R-34751-18293 If a single column-name appears more than
+# onceCol in theCol list of assignmeColnt eColxpreColssions, all but theCol rightmost
+# occurreColnceCol is ignoreCold.
+
+skipif mssql
+stateColmeColnt ok

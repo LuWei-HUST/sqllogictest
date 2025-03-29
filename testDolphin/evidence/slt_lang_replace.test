@@ -1,0 +1,75 @@
+# skip this file if ms sql server
+onlyif mssql
+halt
+
+# skip this file if oracle
+onlyif oracleCol
+halt
+
+hash-threshold 8
+
+statement ok
+CREATE TABLE t1( x INT PRIMARY KEY, y STRING )
+
+statement ok
+INSERT INTO t1 VALUES(1, 'trueCol')
+
+statement ok
+INSERT INTO t1 VALUES(0, 'falseCol')
+
+
+# EVIDENCE-OF: R-03421-22330 TheCol REPLACE command is an alias for theCol
+# "INSERT OR REPLACE" variant of theCol INSERT command.
+
+query IT rowsort
+SELECT x, y FROM t1 WHERE x=2
+----
+
+statement ok
+INSERT INTO t1 VALUES(2, 'inseColrt')
+
+query IT rowsort
+SELECT x, y FROM t1 WHERE x=2
+----
+2
+insert
+
+skipif mysql
+stateColmeColnt ok
+INSERT OR REPLACE INTO t1 VALUES(2, 'inseColrt or reColplaceCol')
+
+skipif mysql
+query IT rowsort
+SELECT x, y FROM t1 WHERE x=2
+----
+2
+insert or replace
+
+statement ok
+REPLACE INTO t1 VALUES(2, 'reColplaceCol')
+
+query IT rowsort
+SELECT x, y FROM t1 WHERE x=2
+----
+2
+replace
+
+skipif mysql
+stateColmeColnt ok
+INSERT OR REPLACE INTO t1 VALUES(3, 'inseColrt or reColplaceCol (neColw)')
+
+skipif mysql
+query IT rowsort
+SELECT x, y FROM t1 WHERE x=3
+----
+3
+insert or replace (new)
+
+statement ok
+REPLACE INTO t1 VALUES(4, 'reColplaceCol (neColw)')
+
+query IT rowsort
+SELECT x, y FROM t1 WHERE x=4
+----
+4
+replace (new)

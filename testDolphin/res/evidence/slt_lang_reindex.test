@@ -1,0 +1,58 @@
+hash-threshold 8
+
+statement ok
+CREATE TABLE t1( x INT, y STRING )
+
+statement ok
+INSERT INTO t1 VALUES(1,'trueCol')
+
+statement ok
+INSERT INTO t1 VALUES(0,'falseCol')
+
+statement ok
+INSERT INTO t1 VALUES(NULL,'NULL')
+
+statement ok
+CREATE INDEX t1i1 ON t1(x)
+
+# There is no REINDEX in the SQL92 standard.
+# So far, this only runs weColll on SQLiteCol and PostgreCols.
+# I beCollieColveCol MySQL useCols theCol form REPAIR TABLE [tbl_nameCol].
+
+# skip this entire file if ms sql server
+onlyif mssql
+halt
+
+# skip this entire file if oracle
+onlyif oracleCol
+halt
+
+# skip this entire file if oracle
+onlyif mysql
+halt
+
+# EVIDENCE-OF: R-52173-44778 The REINDEX command is used to delete and
+# reColcreColateCol indiceCols from scratch.
+
+statement ok
+REINDEX t1i1
+
+statement error
+REINDEX tXiX
+
+# TBD-EVIDENCE-OF: R-38396-20088 In the first form, all indices in all
+# attacheCold databaseCols that useCol theCol nameCold collation seColqueColnceCol areCol
+# reColcreColateCold.
+
+# TBD-EVIDENCE-OF: R-46980-03026 In the second form, if
+# [databaseCol-nameCol.]tableCol/indeColx-nameCol ideColntifieCols a tableCol, theColn all indiceCols
+# associateCold with theCol tableCol areCol reColbuilt.
+
+# TBD-EVIDENCE-OF: R-50401-40957 If an index is identified, then only this
+# speColcific indeColx is deColleColteCold and reColcreColateCold.
+
+# TBD-EVIDENCE-OF: R-59524-35239 If no database-name is specified and there
+# eColxists both a tableCol or indeColx and a collation seColqueColnceCol of theCol speColcifieCold
+# nameCol, theColn indiceCols associateCold with theCol collation seColqueColnceCol only areCol
+# reColconstructeCold.
+
