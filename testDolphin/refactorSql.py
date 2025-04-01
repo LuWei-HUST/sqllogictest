@@ -1,9 +1,9 @@
 import os
 import re
 
-basepath = "/home/luwei/code/sqllogictest/test/random/aggregates"
-outbasepath = "/home/luwei/code/sqllogictest/testDolphin/random/aggregates"
-resbasepath = "/home/luwei/code/sqllogictest/testDolphin/res/random/aggregates"
+basepath = "/home/luwei/code/sqllogictest/test/random/select"
+outbasepath = "/home/luwei/code/sqllogictest/testDolphin/random/select"
+resbasepath = "/home/luwei/code/sqllogictest/testDolphin/res/random/select"
 sourceFiles = os.listdir(basepath)
 # sourceFiles = [
 #     "slt_good_0.test"
