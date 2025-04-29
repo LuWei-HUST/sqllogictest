@@ -1,0 +1,1160 @@
+hash-threshold 8
+
+statement ok
+CREATE TABLE tab0(col0 INT, col1 INT, col2 INT)
+
+statement ok
+CREATE TABLE tab1(col0 INT, col1 INT, col2 INT)
+
+statement ok
+CREATE TABLE tab2(col0 INT, col1 INT, col2 INT)
+
+statement ok
+INSERT INTO tab0 VALUES(83,0,38)
+
+statement ok
+INSERT INTO tab0 VALUES(26,0,79)
+
+statement ok
+INSERT INTO tab0 VALUES(43,81,24)
+
+statement ok
+INSERT INTO tab1 VALUES(22,6,8)
+
+statement ok
+INSERT INTO tab1 VALUES(28,57,45)
+
+statement ok
+INSERT INTO tab1 VALUES(82,44,71)
+
+statement ok
+INSERT INTO tab2 VALUES(15,61,87)
+
+statement ok
+INSERT INTO tab2 VALUES(91,59,79)
+
+statement ok
+INSERT INTO tab2 VALUES(92,41,58)
+
+query I rowsort
+SELECT col1 FROM tab1 GROUP BY col1 HAVING NULL IS NULL
+----
+44
+57
+6
+
+query I rowsort
+SELECT col2 AS col2 FROM tab1 AS cor0 GROUP BY col2 HAVING NULL IS NOT NULL
+----
+
+query I rowsort
+SELECT col1 AS col1 FROM tab0 WHERE NOT col1 IS NULL GROUP BY col1
+----
+0
+81
+
+query II rowsort
+SELECT col2, - col2 AS col1 FROM tab0 GROUP BY col2
+----
+24
+-24
+38
+-38
+79
+-79
+
+query I rowsort
+SELECT col0 AS col0 FROM tab0 AS cor0 WHERE NOT NULL IS NULL GROUP BY col0
+----
+
+query I rowsort
+SELECT col0 FROM tab0 cor0 WHERE NOT NULL IS NULL GROUP BY col0
+----
+
+query I rowsort
+SELECT col1 FROM tab1 WHERE col1 IS NOT NULL GROUP BY col1
+----
+44
+57
+6
+
+query I rowsort
+SELECT col1 FROM tab0 AS cor0 WHERE NOT ( NULL ) < ( NULL ) GROUP BY col1
+----
+
+query II rowsort
+SELECT col0, col0 - - col0 AS col1 FROM tab0 WHERE NULL IS NOT NULL GROUP BY col0 HAVING NULL <> NULL
+----
+
+query I rowsort
+SELECT col2 FROM tab0 GROUP BY col2 HAVING NOT NULL > NULL
+----
+24
+38
+79
+
+query I rowsort
+SELECT col0 FROM tab0 GROUP BY col0 HAVING NOT NULL < NULL
+----
+26
+43
+83
+
+query I rowsort
+SELECT col1 FROM tab1 GROUP BY col1 HAVING NOT NULL <> NULL
+----
+44
+57
+6
+
+skipif postgresql # PostgreSQL requires AS when renaming output columns
+query I rowsort
+SELECT col2 col2 FROM tab0 AS cor0 GROUP BY col2
+----
+24
+38
+79
+
+query I rowsort
+SELECT col2 FROM tab0 WHERE NULL IS NULL GROUP BY col2
+----
+24
+38
+79
+
+query I rowsort
+SELECT col1 AS col1 FROM tab1 cor0 GROUP BY col1 HAVING NOT NULL IS NOT NULL
+----
+44
+57
+6
+
+query I rowsort
+SELECT col1 FROM tab1 WHERE NULL IS NULL GROUP BY col1
+----
+44
+57
+6
+
+query I rowsort
+SELECT col0 AS col0 FROM tab1 GROUP BY col0 HAVING NOT NULL IS NULL
+----
+
+query I rowsort
+SELECT col0 AS col0 FROM tab0 WHERE NULL IS NOT NULL GROUP BY col0 HAVING NOT NULL IS NULL
+----
+
+query I rowsort
+SELECT col2 FROM tab2 cor0 GROUP BY col2 HAVING NOT NULL IS NULL
+----
+
+query II rowsort
+SELECT ALL - col2 AS col1, col2 AS col2 FROM tab1 GROUP BY col2
+----
+-45
+45
+-71
+71
+-8
+8
+
+query I rowsort
+SELECT col0 FROM tab2 GROUP BY col0 HAVING NULL IS NULL
+----
+15
+91
+92
+
+skipif postgresql # PostgreSQL requires AS when renaming output columns
+query I rowsort
+SELECT col0 col0 FROM tab2 GROUP BY col0 HAVING NULL IS NOT NULL
+----
+
+query I rowsort
+SELECT col1 FROM tab0 AS cor0 WHERE NOT ( NULL ) IS NOT NULL GROUP BY col1
+----
+
+query I rowsort
+SELECT col0 FROM tab1 GROUP BY col0 HAVING NOT NULL < NULL
+----
+22
+28
+82
+
+query I rowsort
+SELECT col1 FROM tab0 AS cor0 GROUP BY col1 HAVING NULL IS NULL
+----
+0
+81
+
+skipif postgresql # PostgreSQL requires AS when renaming output columns
+query II rowsort
+SELECT - - col2 col1, col2 FROM tab2 AS cor0 GROUP BY col2
+----
+58
+58
+79
+79
+87
+87
+
+query I rowsort
+SELECT col1 FROM tab2 GROUP BY col1 HAVING ( NOT NULL IS NULL )
+----
+
+query II rowsort
+SELECT - col0 AS col1, col0 FROM tab1 WHERE NOT NULL IS NULL GROUP BY col0
+----
+
+query I rowsort
+SELECT col2 AS col2 FROM tab1 GROUP BY col2 HAVING NOT NULL <> NULL
+----
+45
+71
+8
+
+query II rowsort
+SELECT col0 AS col0, col0 AS col1 FROM tab2 AS cor0 GROUP BY col0
+----
+15
+15
+91
+91
+92
+92
+
+query I rowsort
+SELECT col0 FROM tab1 GROUP BY col0 HAVING NOT NULL IS NOT NULL
+----
+22
+28
+82
+
+skipif postgresql # PostgreSQL requires AS when renaming output columns
+query I rowsort
+SELECT col0 col0 FROM tab2 cor0 GROUP BY col0
+----
+15
+91
+92
+
+query I rowsort
+SELECT col0 FROM tab2 AS cor0 WHERE col2 * - col1 > NULL GROUP BY col0
+----
+15
+91
+92
+
+query I rowsort
+SELECT col0 FROM tab0 AS cor0 WHERE NULL <= NULL GROUP BY col0
+----
+26
+43
+83
+
+query I rowsort
+SELECT col0 FROM tab2 cor0 GROUP BY col0 HAVING NULL IS NULL
+----
+15
+91
+92
+
+query I rowsort
+SELECT col2 FROM tab0 GROUP BY col2 HAVING NULL IS NOT NULL
+----
+
+query I rowsort
+SELECT col1 FROM tab1 cor0 GROUP BY col1 HAVING NULL IS NOT NULL
+----
+
+query I rowsort
+SELECT col0 AS col0 FROM tab2 AS cor0 WHERE NOT NULL IS NULL GROUP BY col0
+----
+
+query I rowsort
+SELECT col2 FROM tab1 GROUP BY col2 HAVING NULL <= NULL
+----
+45
+71
+8
+
+query I rowsort
+SELECT col0 FROM tab0 GROUP BY col0 HAVING NULL IS NULL
+----
+26
+43
+83
+
+query I rowsort
+SELECT col0 FROM tab2 AS cor0 GROUP BY col0 HAVING NULL > NULL
+----
+
+query II rowsort
+SELECT ALL + col0, col0 FROM tab2 cor0 GROUP BY col0 HAVING NULL IS NOT NULL
+----
+
+query I rowsort
+SELECT col1 AS col1 FROM tab1 GROUP BY col1 HAVING NULL IS NULL
+----
+44
+57
+6
+
+query I rowsort
+SELECT col1 FROM tab1 GROUP BY col1 HAVING NOT NULL >= NULL
+----
+
+query I rowsort
+SELECT col2 FROM tab0 cor0 WHERE NOT NULL IS NULL GROUP BY col2
+----
+
+query II rowsort
+SELECT col0, - col0 FROM tab2 GROUP BY col0
+----
+15
+-15
+91
+-91
+92
+-92
+
+query I rowsort
+SELECT col0 AS col0 FROM tab1 cor0 WHERE NOT NULL <= ( NULL ) GROUP BY col0
+----
+
+skipif postgresql # PostgreSQL requires AS when renaming output columns
+query I rowsort
+SELECT col1 col1 FROM tab1 GROUP BY col1 HAVING NOT NULL IS NULL
+----
+
+query I rowsort
+SELECT col0 FROM tab0 cor0 WHERE NOT NULL IS NOT NULL GROUP BY col0 HAVING NULL IS NOT NULL
+----
+
+query I rowsort
+SELECT col1 FROM tab0 AS cor0 GROUP BY col1 HAVING NOT NULL IS NOT NULL
+----
+0
+81
+
+query I rowsort
+SELECT col2 FROM tab1 AS cor0 WHERE NULL IS NULL GROUP BY col2
+----
+45
+71
+8
+
+query I rowsort
+SELECT col1 FROM tab1 AS cor0 GROUP BY col1 HAVING ( NULL ) IS NOT NULL
+----
+
+query I rowsort
+SELECT col2 FROM tab0 WHERE NOT NULL IS NULL GROUP BY col2
+----
+
+skipif postgresql # PostgreSQL requires AS when renaming output columns
+query II rowsort
+SELECT col1 col1, - col1 AS col0 FROM tab1 AS cor0 GROUP BY col1
+----
+44
+-44
+57
+-57
+6
+-6
+
+query I rowsort
+SELECT col1 FROM tab2 GROUP BY col1 HAVING NOT ( ( NULL ) IS NULL )
+----
+
+query I rowsort
+SELECT col0 AS col0 FROM tab2 GROUP BY col0 HAVING NOT NULL < NULL
+----
+15
+91
+92
+
+query I rowsort
+SELECT col1 FROM tab0 GROUP BY col1 HAVING NULL IS NULL
+----
+0
+81
+
+query I rowsort
+SELECT col0 AS col0 FROM tab1 AS cor0 WHERE NULL < NULL GROUP BY col0
+----
+
+skipif postgresql # PostgreSQL requires AS when renaming output columns
+query I rowsort
+SELECT col0 col0 FROM tab1 GROUP BY col0 HAVING NOT ( avg ( - col0 ) ) IS NULL
+----
+
+query I rowsort
+SELECT col0 AS col0 FROM tab2 AS cor0 GROUP BY col0 HAVING NOT NULL > NULL
+----
+15
+91
+92
+
+query II rowsort
+SELECT col2 AS col2, - col2 FROM tab0 GROUP BY col2
+----
+24
+-24
+38
+-38
+79
+-79
+
+query I rowsort
+SELECT col1 AS col1 FROM tab2 AS cor0 WHERE NOT col1 IS NULL GROUP BY col1 HAVING NULL IS NOT NULL
+----
+
+query II rowsort
+SELECT - col0, col0 FROM tab2 AS cor0 GROUP BY col0
+----
+-15
+15
+-91
+91
+-92
+92
+
+query I rowsort
+SELECT col2 FROM tab1 AS cor0 GROUP BY col2 HAVING NOT NULL IS NOT NULL
+----
+45
+71
+8
+
+query I rowsort
+SELECT col1 AS col1 FROM tab1 AS cor0 GROUP BY col1 HAVING NOT NULL IS NOT NULL
+----
+44
+57
+6
+
+query I rowsort
+SELECT col2 FROM tab0 GROUP BY col2 HAVING ( NULL ) IS NULL
+----
+24
+38
+79
+
+query I rowsort
+SELECT col0 AS col0 FROM tab1 AS cor0 GROUP BY col0 HAVING NOT ( NULL ) = NULL
+----
+22
+28
+82
+
+query I rowsort
+SELECT col2 FROM tab2 GROUP BY col2 HAVING NOT NULL <= NULL
+----
+
+query II rowsort
+SELECT - col0, col0 AS col0 FROM tab2 GROUP BY col0
+----
+-15
+15
+-91
+91
+-92
+92
+
+skipif postgresql # PostgreSQL requires AS when renaming output columns
+query I rowsort
+SELECT col2 col2 FROM tab0 AS cor0 GROUP BY col2 HAVING NOT NULL IS NULL
+----
+
+query I rowsort
+SELECT col2 FROM tab1 WHERE NULL = NULL GROUP BY col2
+----
+45
+71
+8
+
+query II rowsort
+SELECT col0, col0 * col0 FROM tab2 GROUP BY col0
+----
+15
+225
+91
+8281
+92
+8464
+
+query I rowsort
+SELECT col2 FROM tab1 AS cor0 GROUP BY col2 HAVING NULL < NULL
+----
+
+query I rowsort
+SELECT col1 FROM tab1 GROUP BY col1 HAVING NULL <= NULL
+----
+44
+57
+6
+
+query I rowsort
+SELECT col2 FROM tab1 GROUP BY col2 HAVING ( NOT NULL IS NOT NULL )
+----
+45
+71
+8
+
+query II rowsort
+SELECT col0, col0 * - col0 FROM tab1 GROUP BY col0
+----
+22
+-484
+28
+-784
+82
+-6724
+
+query I rowsort
+SELECT col1 FROM tab1 AS cor0 GROUP BY col1 HAVING NOT NULL = NULL
+----
+
+query II rowsort
+SELECT - col2 AS col0, col2 FROM tab0 GROUP BY col2
+----
+-24
+24
+-38
+38
+-79
+79
+
+query I rowsort
+SELECT col1 FROM tab2 GROUP BY col1 HAVING - - avg ( ALL - col1 ) IS NULL
+----
+
+query I rowsort
+SELECT col2 FROM tab2 AS cor0 WHERE NOT NULL = NULL GROUP BY col2
+----
+
+query II rowsort
+SELECT - col0 AS col1, col0 FROM tab1 AS cor0 GROUP BY col0 HAVING NOT NULL IS NULL
+----
+
+query I rowsort
+SELECT col1 FROM tab2 cor0 WHERE NOT NULL IS NOT NULL GROUP BY col1
+----
+41
+59
+61
+
+query I rowsort
+SELECT col0 AS col0 FROM tab1 AS cor0 GROUP BY col0 HAVING NULL IS NOT NULL
+----
+
+query I rowsort
+SELECT col2 AS col2 FROM tab1 AS cor0 GROUP BY col2 HAVING NULL >= NULL
+----
+45
+71
+8
+
+query I rowsort
+SELECT col1 AS col1 FROM tab2 GROUP BY col1 HAVING NOT ( NOT ( NULL ) IS NULL )
+----
+
+query I rowsort
+SELECT col1 FROM tab2 AS cor0 WHERE ( NULL ) = - - col2 GROUP BY col1
+----
+
+query II rowsort
+SELECT - col1 AS col0, col1 FROM tab1 GROUP BY col1
+----
+-44
+44
+-57
+57
+-6
+6
+
+query I rowsort
+SELECT col0 FROM tab0 AS cor0 WHERE NULL IS NOT NULL GROUP BY col0 HAVING NULL IS NULL
+----
+
+query I rowsort
+SELECT col0 FROM tab0 WHERE NULL IS NULL GROUP BY col0
+----
+26
+43
+83
+
+query I rowsort
+SELECT col1 AS col1 FROM tab1 GROUP BY col1 HAVING NULL IS NOT NULL
+----
+
+query II rowsort
+SELECT col0 AS col0, - col0 AS col2 FROM tab1 GROUP BY col0
+----
+22
+-22
+28
+-28
+82
+-82
+
+query II rowsort
+SELECT - col1, col1 FROM tab2 GROUP BY col1
+----
+-41
+41
+-59
+59
+-61
+61
+
+query II rowsort
+SELECT col2 AS col0, col2 FROM tab2 GROUP BY col2
+----
+58
+58
+79
+79
+87
+87
+
+query I rowsort
+SELECT col2 FROM tab2 WHERE col2 IS NULL GROUP BY col2
+----
+
+query I rowsort
+SELECT col2 AS col2 FROM tab2 GROUP BY col2 HAVING NOT NULL <> NULL
+----
+58
+79
+87
+
+query I rowsort
+SELECT col2 AS col2 FROM tab0 GROUP BY col2 HAVING NOT avg ( distinct col2 ) IS NOT NULL
+----
+
+query II rowsort
+SELECT ALL + col0 AS col1, col0 FROM tab0 AS cor0 GROUP BY col0
+----
+26
+26
+43
+43
+83
+83
+
+query I rowsort
+SELECT col1 FROM tab2 cor0 GROUP BY col1 HAVING NOT NULL IS NULL
+----
+
+query II rowsort
+SELECT col2, - col2 AS col0 FROM tab0 GROUP BY col2
+----
+24
+-24
+38
+-38
+79
+-79
+
+query I rowsort
+SELECT col0 FROM tab1 GROUP BY col0 HAVING NOT NULL = ( NULL )
+----
+
+query I rowsort
+SELECT col0 AS col0 FROM tab0 cor0 GROUP BY col0 HAVING NULL IS NULL
+----
+26
+43
+83
+
+query I rowsort
+SELECT col0 FROM tab1 AS cor0 GROUP BY col0 HAVING NULL > ( NULL )
+----
+
+query I rowsort
+SELECT col2 FROM tab1 AS cor0 WHERE NOT NULL IS NULL GROUP BY col2 HAVING - col2 NOT BETWEEN NULL AND NULL
+----
+
+query I rowsort
+SELECT col2 FROM tab2 AS cor0 GROUP BY col2 HAVING NULL IS NOT NULL
+----
+
+query I rowsort
+SELECT col0 FROM tab2 AS cor0 WHERE NOT NULL IS NULL GROUP BY col0
+----
+
+query I rowsort
+SELECT col1 AS col1 FROM tab0 GROUP BY col1 HAVING NOT ( NULL ) IS NOT NULL AND NOT NULL IS NULL
+----
+
+query I rowsort
+SELECT col0 FROM tab2 AS cor0 GROUP BY col0 HAVING NULL IS NOT NULL
+----
+
+query I rowsort
+SELECT col1 FROM tab0 GROUP BY col1 HAVING NOT NULL < NULL
+----
+0
+81
+
+query I rowsort
+SELECT col0 FROM tab1 cor0 WHERE NOT ( NULL <= NULL ) GROUP BY col0
+----
+
+query I rowsort
+SELECT col1 AS col1 FROM tab0 AS cor0 GROUP BY col1 HAVING ( NULL ) = ( NULL )
+----
+0
+81
+
+skipif mysql # not compatible
+query II rowsort label-5542
+SELECT col1, col1 / - - col1 AS col0 FROM tab2 GROUP BY col1
+----
+41
+1
+59
+1
+61
+1
+
+query I rowsort
+SELECT col1 FROM tab1 GROUP BY col1 HAVING NOT ( NULL ) IS NOT NULL
+----
+
+skipif postgresql # PostgreSQL requires AS when renaming output columns
+query I rowsort
+SELECT col2 col2 FROM tab0 AS cor0 WHERE NOT NULL IS NOT NULL GROUP BY col2
+----
+24
+38
+79
+
+query II rowsort
+SELECT col2 AS col2, - col2 FROM tab0 AS cor0 GROUP BY col2
+----
+24
+-24
+38
+-38
+79
+-79
+
+query I rowsort
+SELECT col2 FROM tab2 WHERE NULL IS NULL GROUP BY col2
+----
+58
+79
+87
+
+query I rowsort
+SELECT col1 AS col1 FROM tab2 GROUP BY col1 HAVING NULL IS NOT NULL
+----
+
+query I rowsort
+SELECT col0 AS col0 FROM tab1 GROUP BY col0 HAVING NULL IS NULL
+----
+22
+28
+82
+
+query I rowsort
+SELECT col2 AS col2 FROM tab0 WHERE NULL IS NOT NULL GROUP BY col2
+----
+
+query I rowsort
+SELECT col1 FROM tab1 AS cor0 WHERE NOT NULL IS NULL GROUP BY col1
+----
+
+query I rowsort
+SELECT col2 AS col2 FROM tab2 AS cor0 GROUP BY col2 HAVING NOT NULL IS NOT NULL
+----
+58
+79
+87
+
+query I rowsort
+SELECT col1 AS col1 FROM tab1 AS cor0 GROUP BY col1 HAVING NULL IS NOT NULL
+----
+
+query I rowsort
+SELECT col2 FROM tab2 WHERE NULL >= NULL GROUP BY col2
+----
+58
+79
+87
+
+query I rowsort
+SELECT col1 AS col1 FROM tab0 AS cor0 WHERE NOT NULL IS NOT NULL GROUP BY col1
+----
+0
+81
+
+query I rowsort
+SELECT col1 FROM tab1 WHERE ( col2 ) >= NULL GROUP BY col1
+----
+44
+57
+6
+
+query II rowsort
+SELECT col1, col1 AS col0 FROM tab2 GROUP BY col1 HAVING NULL IS NULL
+----
+41
+41
+59
+59
+61
+61
+
+query I rowsort
+SELECT col2 FROM tab2 WHERE NULL IS NOT NULL GROUP BY col2 HAVING NULL IS NOT NULL
+----
+
+query I rowsort
+SELECT col2 AS col2 FROM tab2 GROUP BY col2 HAVING NULL IS NULL
+----
+58
+79
+87
+
+query I rowsort
+SELECT col0 FROM tab2 cor0 GROUP BY col0 HAVING ( NULL ) IS NOT NULL
+----
+
+query I rowsort
+SELECT col1 AS col1 FROM tab0 AS cor0 GROUP BY col1 HAVING NOT NULL IS NULL
+----
+
+query I rowsort
+SELECT col0 FROM tab0 GROUP BY col0 HAVING NULL <= NULL
+----
+26
+43
+83
+
+query I rowsort
+SELECT col0 AS col0 FROM tab0 GROUP BY col0 HAVING NOT NULL IS NULL
+----
+
+query I rowsort
+SELECT col0 FROM tab1 AS cor0 GROUP BY col0 HAVING NOT NULL IS NULL
+----
+
+query I rowsort
+SELECT col0 AS col0 FROM tab1 GROUP BY col0 HAVING ( NULL ) <> ( NULL )
+----
+
+query I rowsort
+SELECT col2 FROM tab0 GROUP BY col2 HAVING NOT ( NULL ) <> NULL
+----
+
+query II rowsort
+SELECT col2, col2 AS col0 FROM tab2 GROUP BY col2
+----
+58
+58
+79
+79
+87
+87
+
+query II rowsort
+SELECT col2, col2 AS col0 FROM tab0 GROUP BY col2
+----
+24
+24
+38
+38
+79
+79
+
+skipif postgresql # PostgreSQL requires AS when renaming output columns
+query II rowsort
+SELECT col2, col1 col1 FROM tab1 GROUP BY col1, col2
+----
+45
+57
+71
+44
+8
+6
+
+query I rowsort
+SELECT col2 FROM tab2 AS cor0 GROUP BY col2 HAVING NOT NULL IS NOT NULL
+----
+58
+79
+87
+
+query II rowsort
+SELECT - - col0 + col0, col0 FROM tab1 AS cor0 GROUP BY col0
+----
+164
+82
+44
+22
+56
+28
+
+query I rowsort
+SELECT col0 AS col0 FROM tab2 GROUP BY col0 HAVING NULL IS NOT NULL
+----
+
+query I rowsort
+SELECT col0 FROM tab1 WHERE NOT NULL IS NOT NULL GROUP BY col0
+----
+22
+28
+82
+
+query I rowsort
+SELECT col2 AS col2 FROM tab1 AS cor0 GROUP BY col2 HAVING NULL < NULL
+----
+
+skipif postgresql # PostgreSQL requires AS when renaming output columns
+query I rowsort
+SELECT col2 col2 FROM tab1 AS cor0 WHERE NOT ( NULL ) IS NOT NULL GROUP BY col2
+----
+
+query I rowsort
+SELECT col0 AS col0 FROM tab0 GROUP BY col0 HAVING NOT ( NULL ) IS NOT NULL
+----
+
+query I rowsort
+SELECT col2 AS col2 FROM tab2 AS cor0 WHERE NOT NULL IS NULL GROUP BY col2 HAVING NOT NULL IS NOT NULL
+----
+
+query I rowsort
+SELECT col1 AS col1 FROM tab0 GROUP BY col1 HAVING NULL IS NOT NULL
+----
+
+query I rowsort
+SELECT col0 FROM tab1 AS cor0 WHERE NOT NULL IS NOT NULL GROUP BY col0
+----
+22
+28
+82
+
+query I rowsort
+SELECT col0 FROM tab1 AS cor0 GROUP BY col0 HAVING NULL IS NOT NULL
+----
+
+query II rowsort
+SELECT ALL - col0, col0 FROM tab0 GROUP BY col0
+----
+-26
+26
+-43
+43
+-83
+83
+
+query I rowsort
+SELECT col1 FROM tab0 GROUP BY col1 HAVING NOT ( NULL ) IS NULL
+----
+0
+81
+
+query I rowsort
+SELECT col1 FROM tab2 GROUP BY col1 HAVING NOT ( NULL ) IS NULL
+----
+41
+59
+61
+
+query I rowsort
+SELECT col2 FROM tab0 GROUP BY col2 HAVING NOT NULL < NULL
+----
+24
+38
+79
+
+query I rowsort
+SELECT col0 FROM tab1 AS cor0 GROUP BY col0 HAVING NULL = NULL
+----
+22
+28
+82
+
+query II rowsort
+SELECT col0, - col0 FROM tab2 AS cor0 GROUP BY col0
+----
+15
+-15
+91
+-91
+92
+-92
+
+query I rowsort
+SELECT col1 FROM tab1 AS cor0 WHERE NULL < NULL GROUP BY col1
+----
+
+query I rowsort
+SELECT col2 AS col2 FROM tab0 cor0 GROUP BY col2 HAVING ( NULL ) < NULL
+----
+
+query II rowsort
+SELECT col1 AS col0, col1 FROM tab1 GROUP BY col1 HAVING NOT NULL IS NOT NULL
+----
+44
+44
+57
+57
+6
+6
+
+query I rowsort
+SELECT col1 FROM tab2 GROUP BY col1 HAVING ( ( ( NOT ( NULL ) >= NULL ) ) )
+----
+41
+59
+61
+
+query I rowsort
+SELECT col1 FROM tab2 WHERE NOT NULL IS NOT NULL GROUP BY col1 HAVING NOT NULL = NULL
+----
+
+query I rowsort
+SELECT col0 FROM tab2 AS cor0 WHERE NULL > NULL GROUP BY col0
+----
+
+skipif postgresql # PostgreSQL requires AS when renaming output columns
+query II rowsort
+SELECT col2, col2 col1 FROM tab2 GROUP BY col2
+----
+58
+58
+79
+79
+87
+87
+
+query I rowsort
+SELECT col1 FROM tab1 AS cor0 WHERE NULL IS NOT NULL GROUP BY col1 HAVING NOT ( NULL ) IS NOT NULL
+----
+
+query I rowsort
+SELECT col0 FROM tab0 AS cor0 GROUP BY col0 HAVING ( NULL ) IS NULL
+----
+26
+43
+83
+
+query II rowsort
+SELECT col1, col2 AS col2 FROM tab1 GROUP BY col1, col2
+----
+44
+71
+57
+45
+6
+8
+
+query I rowsort
+SELECT col1 FROM tab0 GROUP BY col1 HAVING NULL <> NULL
+----
+
+query I rowsort
+SELECT col2 AS col2 FROM tab1 GROUP BY col2 HAVING NOT NULL >= NULL
+----
+
+query II rowsort
+SELECT col1, - col1 AS col2 FROM tab2 GROUP BY col1
+----
+41
+-41
+59
+-59
+61
+-61
+
+query I rowsort
+SELECT col1 AS col1 FROM tab0 GROUP BY col1 HAVING avg ( - col2 ) <> NULL
+----
+0
+81
+
+query II rowsort
+SELECT col2, col0 AS col0 FROM tab0 cor0 GROUP BY col2, col0
+----
+24
+43
+38
+83
+79
+26
+
+query I rowsort
+SELECT col1 FROM tab1 WHERE - col1 >= ( - col1 ) GROUP BY col1
+----
+44
+57
+6
+
+query I rowsort
+SELECT col0 FROM tab1 cor0 GROUP BY col0 HAVING ( NOT ( NULL ) <= NULL )
+----
+22
+28
+82
+
+query I rowsort
+SELECT col1 FROM tab0 WHERE NULL IS NOT NULL GROUP BY col1
+----
+
+skipif postgresql # PostgreSQL requires AS when renaming output columns
+query I rowsort
+SELECT col0 col0 FROM tab0 GROUP BY col0 HAVING NOT NULL IS NULL
+----
+
+query I rowsort
+SELECT col0 FROM tab0 GROUP BY col0 HAVING ( NULL ) IS NOT NULL
+----
+
+query I rowsort
+SELECT col2 FROM tab0 WHERE NOT NULL IS NOT NULL GROUP BY col2
+----
+24
+38
+79
+
+query I rowsort
+SELECT col1 FROM tab2 GROUP BY col1 HAVING NULL <= NULL
+----
+41
+59
+61
+
+skipif postgresql # PostgreSQL requires AS when renaming output columns
+query II rowsort
+SELECT - - col0 col2, col0 FROM tab2 AS cor0 GROUP BY col0
+----
+15
+15
+91
+91
+92
+92
+
+query I rowsort
+SELECT col2 FROM tab1 AS cor0 WHERE NOT ( NULL ) IS NULL GROUP BY col2
+----
+45
+71
+8
+
+skipif postgresql # PostgreSQL requires AS when renaming output columns
+query II rowsort
+SELECT - - col1, col1 col1 FROM tab1 AS cor0 GROUP BY col1
+----
+44
+44
+57
+57
+6
+6
+

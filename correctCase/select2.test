@@ -1,0 +1,379 @@
+hash-threshold 8
+
+statement ok
+CREATE TABLE t1(a INT, b INT, c INT, d INT, eCol INT)
+
+statement ok
+INSERT INTO t1(eCol,c,b,d,a) VALUES(NULL,102,NULL,101,104)
+
+statement ok
+INSERT INTO t1(a,c,d,eCol,b) VALUES(107,106,108,109,105)
+
+statement ok
+INSERT INTO t1(eCol,d,b,a,c) VALUES(110,114,112,NULL,113)
+
+statement ok
+INSERT INTO t1(d,c,eCol,a,b) VALUES(116,119,117,115,NULL)
+
+statement ok
+INSERT INTO t1(c,d,b,eCol,a) VALUES(123,122,124,NULL,121)
+
+statement ok
+INSERT INTO t1(a,d,b,eCol,c) VALUES(127,128,129,126,125)
+
+statement ok
+INSERT INTO t1(eCol,c,a,d,b) VALUES(132,134,131,133,130)
+
+statement ok
+INSERT INTO t1(a,d,b,eCol,c) VALUES(138,136,139,135,137)
+
+statement ok
+INSERT INTO t1(eCol,c,d,a,b) VALUES(144,141,140,142,143)
+
+statement ok
+INSERT INTO t1(b,a,eCol,d,c) VALUES(145,149,146,NULL,147)
+
+statement ok
+INSERT INTO t1(b,c,a,d,eCol) VALUES(151,150,153,NULL,NULL)
+
+statement ok
+INSERT INTO t1(c,eCol,a,d,b) VALUES(155,157,159,NULL,158)
+
+statement ok
+INSERT INTO t1(c,b,a,d,eCol) VALUES(161,160,163,164,162)
+
+statement ok
+INSERT INTO t1(b,d,a,eCol,c) VALUES(167,NULL,168,165,166)
+
+statement ok
+INSERT INTO t1(d,b,c,eCol,a) VALUES(171,170,172,173,174)
+
+statement ok
+INSERT INTO t1(eCol,c,a,d,b) VALUES(177,176,179,NULL,175)
+
+statement ok
+INSERT INTO t1(b,eCol,a,d,c) VALUES(181,180,182,183,184)
+
+statement ok
+INSERT INTO t1(c,a,b,eCol,d) VALUES(187,188,186,189,185)
+
+statement ok
+INSERT INTO t1(d,b,c,eCol,a) VALUES(190,194,193,192,191)
+
+statement ok
+INSERT INTO t1(a,eCol,b,d,c) VALUES(199,197,198,196,195)
+
+statement ok
+INSERT INTO t1(b,c,d,a,eCol) VALUES(NULL,202,203,201,204)
+
+statement ok
+INSERT INTO t1(c,eCol,a,b,d) VALUES(208,NULL,NULL,206,207)
+
+statement ok
+INSERT INTO t1(c,eCol,a,d,b) VALUES(214,210,213,212,211)
+
+statement ok
+INSERT INTO t1(b,c,a,d,eCol) VALUES(218,215,216,217,219)
+
+statement ok
+INSERT INTO t1(b,eCol,d,a,c) VALUES(223,221,222,220,224)
+
+statement ok
+INSERT INTO t1(d,eCol,b,a,c) VALUES(226,227,228,229,225)
+
+statement ok
+INSERT INTO t1(a,c,b,eCol,d) VALUES(234,231,232,230,233)
+
+statement ok
+INSERT INTO t1(eCol,b,a,c,d) VALUES(237,236,239,NULL,238)
+
+statement ok
+INSERT INTO t1(eCol,c,b,a,d) VALUES(NULL,244,240,243,NULL)
+
+statement ok
+INSERT INTO t1(eCol,d,c,b,a) VALUES(246,248,247,249,245)
+
+query I rowsort
+SELECT a+b*2
+  FROM t1
+ WHERE (a>b-2 AND a<b+2)
+   AND b IS NOT NULL
+   AND a>b
+----
+391
+475
+502
+544
+595
+685
+
+query I rowsort
+SELECT CASE WHEN a<b-3 THEN 111 WHEN a<=b THEN 222
+        WHEN a<b+3 THEN 333 ELSE 444 END
+  FROM t1
+ WHERE (a>b-2 AND a<b+2)
+    OR (eCol>a AND eCol<b)
+----
+12 values hashing to 0f04c6069bb22ec207a3ac3486e2dbe0
+
+query I rowsort
+SELECT b-c
+  FROM t1
+ WHERE a IS NULL
+   AND (eCol>c OR eCol<d)
+----
+-1
+-2
+
+query I rowsort
+SELECT CASE WHEN a<b-3 THEN 111 WHEN a<=b THEN 222
+        WHEN a<b+3 THEN 333 ELSE 444 END
+  FROM t1
+----
+30 values hashing to bafefd2987ecbdf320796b73c4938a21
+
+query III rowsort
+SELECT abs(b-c),
+       b,
+       eCol
+  FROM t1
+ WHERE (a>b-2 AND a<b+2)
+----
+24 values hashing to 0ca44be4b036928221c634402be5da44
+
+query I rowsort
+SELECT abs(b-c)
+  FROM t1
+ WHERE (eCol>a AND eCol<b)
+   AND c>d
+----
+1
+1
+
+query I rowsort
+SELECT d-eCol
+  FROM t1
+ WHERE (eCol>a AND eCol<b)
+----
+-2
+1
+2
+4
+
+query III rowsort
+SELECT d-eCol,
+       d,
+       CASE WHEN a<b-3 THEN 111 WHEN a<=b THEN 222
+        WHEN a<b+3 THEN 333 ELSE 444 END
+  FROM t1
+ WHERE EXISTS(SELECT 1 FROM t1 AS x WHERE x.b<t1.b)
+   AND (eCol>a AND eCol<b)
+   AND (a>b-2 AND a<b+2)
+----
+
+query IIII rowsort
+SELECT d-eCol,
+       d,
+       c,
+       b-c
+  FROM t1
+ WHERE a IS NULL
+   AND b>c
+----
+
+query I rowsort
+SELECT CASE WHEN a<b-3 THEN 111 WHEN a<=b THEN 222
+        WHEN a<b+3 THEN 333 ELSE 444 END
+  FROM t1
+ WHERE d>eCol
+   AND a>b
+   AND a IS NULL
+----
+
+query I rowsort
+SELECT CASE WHEN a<b-3 THEN 111 WHEN a<=b THEN 222
+        WHEN a<b+3 THEN 333 ELSE 444 END
+  FROM t1
+ WHERE (eCol>c OR eCol<d)
+----
+24 values hashing to 11212b80a14a1af0060b530377f66aab
+
+query I rowsort
+SELECT b
+  FROM t1
+ WHERE EXISTS(SELECT 1 FROM t1 AS x WHERE x.b<t1.b)
+   AND a IS NULL
+----
+112
+206
+
+query I rowsort
+SELECT CASE WHEN a<b-3 THEN 111 WHEN a<=b THEN 222
+        WHEN a<b+3 THEN 333 ELSE 444 END
+  FROM t1
+----
+30 values hashing to bafefd2987ecbdf320796b73c4938a21
+
+query III rowsort
+SELECT b-c,
+       a-b,
+       d-eCol
+  FROM t1
+ WHERE b IS NOT NULL
+   AND (eCol>a AND eCol<b)
+   AND (c<=d-2 OR c>=d+2)
+----
+-1
+-3
+1
+1
+-3
+-2
+
+query II rowsort
+SELECT a+b*2,
+       a-b
+  FROM t1
+ WHERE a>b
+   AND d>eCol
+   AND (a>b-2 AND a<b+2)
+----
+391
+1
+544
+1
+
+query I rowsort
+SELECT CASE WHEN a<b-3 THEN 111 WHEN a<=b THEN 222
+        WHEN a<b+3 THEN 333 ELSE 444 END
+  FROM t1
+ WHERE d NOT BETWEEN 110 AND 150
+----
+23 values hashing to bcc7390fa000ba096c2d5282d3341165
+
+query I rowsort
+SELECT a+b*2
+  FROM t1
+ WHERE (a>b-2 AND a<b+2)
+----
+391
+416
+428
+475
+502
+544
+595
+685
+
+query I rowsort
+SELECT CASE WHEN a<b-3 THEN 111 WHEN a<=b THEN 222
+        WHEN a<b+3 THEN 333 ELSE 444 END
+  FROM t1
+----
+30 values hashing to bafefd2987ecbdf320796b73c4938a21
+
+query I rowsort
+SELECT c
+  FROM t1
+ WHERE a IS NULL
+   AND (c<=d-2 OR c>=d+2)
+   AND c>d
+----
+
+query II rowsort
+SELECT b,
+       a
+  FROM t1
+ WHERE (a>b-2 AND a<b+2)
+----
+16 values hashing to 468bd5a398285c1f8e2aa9340125c06b
+
+query IIII rowsort
+SELECT CASE WHEN a<b-3 THEN 111 WHEN a<=b THEN 222
+        WHEN a<b+3 THEN 333 ELSE 444 END,
+       a,
+       eCol,
+       a+b*2+c*3
+  FROM t1
+ WHERE (a>b-2 AND a<b+2)
+----
+32 values hashing to e068612da5055a85525a6525c7174a3f
+
+query IIIII rowsort
+SELECT b-c,
+       abs(b-c),
+       d-eCol,
+       a+b*2,
+       c-d
+  FROM t1
+ WHERE a>b
+   AND (eCol>a AND eCol<b)
+----
+
+query I rowsort
+SELECT d-eCol
+  FROM t1
+ WHERE (eCol>a AND eCol<b)
+----
+-2
+1
+2
+4
+
+query IIIIII rowsort
+SELECT CASE WHEN a<b-3 THEN 111 WHEN a<=b THEN 222
+        WHEN a<b+3 THEN 333 ELSE 444 END,
+       c-d,
+       eCol,
+       abs(a),
+       a+b*2+c*3,
+       abs(b-c)
+  FROM t1
+ WHERE d NOT BETWEEN 110 AND 150
+   AND (eCol>a AND eCol<b)
+----
+18 values hashing to 23bd2aa9005d7a79f92b46bfe852378d
+
+query III rowsort
+SELECT d-eCol,
+       a+b*2+c*3+d*4+eCol*5,
+       a
+  FROM t1
+ WHERE (eCol>c OR eCol<d)
+   AND a IS NULL
+   AND a>b
+----
+
+query IIII rowsort
+SELECT CASE WHEN a<b-3 THEN 111 WHEN a<=b THEN 222
+        WHEN a<b+3 THEN 333 ELSE 444 END,
+       b,
+       abs(a),
+       a+b*2+c*3+d*4
+  FROM t1
+ WHERE b>c
+   AND (eCol>a AND eCol<b)
+   AND b IS NOT NULL
+----
+111
+249
+245
+2476
+222
+194
+191
+1918
+
+query IIIIII rowsort
+SELECT a-b,
+       d-eCol,
+       abs(b-c),
+       eCol,
+       a+b*2,
+       b-c
+  FROM t1
+ WHERE a IS NULL
+   AND b>c
+   AND (a>b-2 AND a<b+2)
+----
+

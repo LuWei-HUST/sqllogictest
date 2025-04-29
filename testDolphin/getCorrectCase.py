@@ -1,16 +1,18 @@
 import os
 import re
 
-sourceBasePath = "/home/luwei/code/sqllogictest/testDolphin/res/random/select"
-outBasePath = "/home/luwei/code/sqllogictest/correctCase/random/select"
-verifyResBasePath = "/home/luwei/code/sqllogictest/correctCase/res/random/select"
+sourceBasePath = "/home/luwei/code/sqllogictest/tempRes/random/aggregates"
+verifyResBasePath = "/home/luwei/code/sqllogictest/verifyRes/random/aggregates"
+outBasePath = "/home/luwei/code/sqllogictest/correctCase/random/aggregates"
 
-sourceFiles = [
-    "slt_good_0.test"
-]
+
+sourceFiles = [f for f in os.listdir(sourceBasePath) if os.path.isfile(os.path.join(sourceBasePath, f))]
+# sourceFiles = [
+#     "select1.test"
+# ]
 
 if not os.path.exists(outBasePath):
-    os.mkdir(outBasePath)
+    os.makedirs(outBasePath)
 
 def getNextRecord(i, lines, length):
     if i == 0:
@@ -42,7 +44,7 @@ for sFile in sourceFiles:
             nextInd = getNextRecord(1, lines, length)
             p = 0
             while l < length:
-                if indexes[p] > l and nextInd > indexes[p]:
+                if p < len(indexes) and indexes[p] > l and nextInd > indexes[p]:
                     while p < len(indexes) and indexes[p] < nextInd:
                         p += 1
                     l = nextInd

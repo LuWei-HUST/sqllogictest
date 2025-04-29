@@ -617,7 +617,7 @@ static int ODBC3Query(
               break;
             }
             case SQL_INTEGER: {
-              long int li = 0L;
+              int li = 0;
               SQLGetData(stmt, 
                          i, 
                          SQL_C_SLONG,
@@ -627,7 +627,7 @@ static int ODBC3Query(
               if( indicator == SQL_NULL_DATA ){
                 strcpy(zBuffer, "NULL");
               }else{
-                sprintf(zBuffer, "%ld", li);
+                sprintf(zBuffer, "%d", li);
               }
               ODBC3_appendValue(&res, zBuffer);
               break;

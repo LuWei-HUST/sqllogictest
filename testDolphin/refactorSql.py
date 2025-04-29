@@ -1,19 +1,24 @@
 import os
 import re
 
-basepath = "/home/luwei/code/sqllogictest/test/random/select"
-outbasepath = "/home/luwei/code/sqllogictest/testDolphin/random/select"
-resbasepath = "/home/luwei/code/sqllogictest/testDolphin/res/random/select"
-sourceFiles = os.listdir(basepath)
+basepath = "/home/luwei/code/sqllogictest/test/random/aggregates"
+outbasepath = "/home/luwei/code/sqllogictest/testDolphin/random/aggregates"
+resbasepath = "/home/luwei/code/sqllogictest/tempRes/random/aggregates"
+verifyResBasePath = "/home/luwei/code/sqllogictest/verifyRes/random/aggregates"
+
+sourceFiles = [f for f in os.listdir(basepath) if os.path.isfile(os.path.join(basepath, f))]
 # sourceFiles = [
 #     "slt_good_0.test"
 # ]
 
 if not os.path.exists(outbasepath):
-    os.mkdir(outbasepath)
+    os.makedirs(outbasepath)
 
 if not os.path.exists(resbasepath):
-    os.mkdir(resbasepath)
+    os.makedirs(resbasepath)
+
+if not os.path.exists(verifyResBasePath):
+    os.makedirs(verifyResBasePath)
 
 # print(sourceFiles)
 # exit(0)
@@ -80,3 +85,11 @@ for sfile in sourceFiles:
     cmdstr = "~/code/sqllogictest/src/sqllogictest --engine ODBC3 --connection 'DSN=dolphindb;DRIVER={{DolphinDB}};SERVER=127.0.0.1;PORT=8848;UID=admin;PWD=123456;' {} > {}".format(outfilepath, resfilepath)
 
     os.system(cmdstr)
+
+    verifyResFilePath = os.path.join(verifyResBasePath, sfile)
+    # print(verifyResFilePath)
+
+    cmdStr = "~/code/sqllogictest/src/sqllogictest -verify {} > {}".format(resfilepath, verifyResFilePath)
+    # print(cmdStr)
+
+    os.system(cmdStr)
